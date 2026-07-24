@@ -10,6 +10,7 @@
 #include "Components/CapsuleComponent.h"
 #include "DataAssets/Input/DataAsset_InputConfig.h"
 #include "Component/Input/WarrriorInputComponent.h"
+#include "DataAssets/StartUpData/DataAsset_StartUpDataBase.h"
 #include "AbilitySystem/WarriorAbilitySystemComponent.h"
 
 AWarriorHeroCharacter::AWarriorHeroCharacter()
@@ -42,9 +43,13 @@ AWarriorHeroCharacter::AWarriorHeroCharacter()
 void AWarriorHeroCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
-	if (WarriorAbilitySystemComponent &&WarriorAttributeSet)
+
+	if (!CharacterStartUpData.IsNull())
 	{
-		Debug::Print(TEXT("Ability System Component valid"));
+		if(UDataAsset_StartUpDataBase* LoadData = CharacterStartUpData.LoadSynchronous())
+		{
+			LoadData->GiveToAbilitySystemComponent(GetWarriorAbilitySystemComponent(), 1);
+		}
 	}
 }
 

@@ -7,11 +7,7 @@
 void UWarriorHeroAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
-
-	if (OwningHeroCharacter)
-	{
-		OwningCharacter = Cast<AWarriorHeroCharacter>(OwningCharacter);
-	}
+	OwningHeroCharacter = Cast<AWarriorHeroCharacter>(OwningCharacter);
 }
 
 void UWarriorHeroAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)

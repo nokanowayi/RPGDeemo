@@ -1,7 +1,9 @@
 // MyRPGDemo
 
-
+#include "AbilitySystem//Abilities/WarriorHeroGameplayAbility.h"
 #include "AbilitySystem/WarriorAbilitySystemComponent.h"
+
+#include "WarriorDebugHelper.h"
 
 void UWarriorAbilitySystemComponent::OnAbilityInputPressed(FGameplayTag& InputTag)
 {
@@ -27,7 +29,7 @@ void UWarriorAbilitySystemComponent::GrantHeroWeaponAbilities(const TArray<FWarr
 	for (const FWarriorHeroAbilitySet& HeroAbilitySet : WeaponAbilities)
 	{
 		if (!HeroAbilitySet.IsValid()) continue;
-		FGameplayAbilitySpec AbilitySpec(HeroAbilitySet.AbilityToGrant);
+		FGameplayAbilitySpec AbilitySpec(HeroAbilitySet.AbilityToGrant, ApplyLevel);
 		AbilitySpec.SourceObject = GetAvatarActor();
 		AbilitySpec.Level = ApplyLevel;
 		AbilitySpec.GetDynamicSpecSourceTags().AddTag(HeroAbilitySet.InputTag);
@@ -42,6 +44,7 @@ void UWarriorAbilitySystemComponent::RemoveGrantedHeroWeaponAbilities(
 	if (InSpeHandlesToRemove.IsEmpty()) return;
 	for (const FGameplayAbilitySpecHandle& SpecHandle : InSpeHandlesToRemove)
 	{
+		Debug::Print(FString::Printf(TEXT("RemoveGrantedHeroWeaponAbilities: %s"), *SpecHandle.ToString()));
 		if (SpecHandle.IsValid())
 		{
 			ClearAbility(SpecHandle);

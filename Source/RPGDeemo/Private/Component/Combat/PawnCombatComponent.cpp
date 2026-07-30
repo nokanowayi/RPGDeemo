@@ -19,8 +19,6 @@ void UPawnCombatComponent::RegisterSpawnedWeapon(FGameplayTag InWeaponTagToRegis
 	{
 		CurrentEquippedWeaponTag = InWeaponTagToRegister;
 	}
-	const FString WeaponString = FString::Printf(TEXT("Registered Weapon: %s"),*InWeaponToRegister->GetName());
-	Debug::Print(WeaponString);
 
 }
 

@@ -7,6 +7,7 @@
 #include "DataAssets/Input/DataAsset_InputConfig.h"
 
 #include "WarriorStructTypes.generated.h"
+class UWarriorHeroGameplayAbility;
 
 USTRUCT(blueprintType)
 struct FWarriorHeroAbilitySet

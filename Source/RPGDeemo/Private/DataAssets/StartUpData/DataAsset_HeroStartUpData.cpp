@@ -1,6 +1,7 @@
 // MyRPGDemo
 
 #include "WarriorTypes/WarriorStructTypes.h"
+#include "AbilitySystem//Abilities/WarriorHeroGameplayAbility.h"
 #include "DataAssets/StartUpData/DataAsset_HeroStartUpData.h"
 
 

@@ -1,8 +1,8 @@
 // MyRPGDemo
 
+#include "DataAssets/StartUpData/DataAsset_HeroStartUpData.h"
 #include "WarriorTypes/WarriorStructTypes.h"
 #include "AbilitySystem//Abilities/WarriorHeroGameplayAbility.h"
-#include "DataAssets/StartUpData/DataAsset_HeroStartUpData.h"
 
 
 void UDataAsset_HeroStartUpData::GiveToAbilitySystemComponent(UWarriorAbilitySystemComponent* InASCToGive,

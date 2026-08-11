@@ -15,6 +15,9 @@ void UPawnCombatComponent::RegisterSpawnedWeapon(FGameplayTag InWeaponTagToRegis
 
 	CharacterCarriedWeaponsMap.Emplace(InWeaponTagToRegister,InWeaponToRegister);
 
+	InWeaponToRegister->OnWeaponHitTarget.BindUObject(this,&ThisClass::OnHitTargetActor);
+	InWeaponToRegister->OnWeaponPulledFromTarget.BindUObject(this,&ThisClass::OnWeaponPullFromTargetActor);
+	
 	if (bRegisterAsEquippedWeapon)
 	{
 		CurrentEquippedWeaponTag = InWeaponTagToRegister;
@@ -31,7 +34,7 @@ AWarriorWeaponBase* UPawnCombatComponent::GetCharacterCarriedWeaponByTag(FGamepl
 	return nullptr;
 }
 
-AWarriorWeaponBase* UPawnCombatComponent::GetCharacterCurrentEquippedWeapon(FGameplayTag InWeaponTagToGet) const
+AWarriorWeaponBase* UPawnCombatComponent::GetCharacterCurrentEquippedWeapon() const
 {
 	if (!CurrentEquippedWeaponTag.IsValid())
 	{
@@ -39,5 +42,32 @@ AWarriorWeaponBase* UPawnCombatComponent::GetCharacterCurrentEquippedWeapon(FGam
 	}
 
 	return GetCharacterCarriedWeaponByTag(CurrentEquippedWeaponTag);
+}
+
+void UPawnCombatComponent::ToggleWeaponColiision(bool bShouldEnable, EToggleDamageType ToggleDamageType)
+{
+	if (ToggleDamageType == EToggleDamageType::CurrentEquippedWeapon)
+	{
+		AWarriorWeaponBase* weapon = GetCharacterCurrentEquippedWeapon();
+		check(weapon);
+		if (bShouldEnable)
+		{
+			weapon->GetWeaponCollisionBox()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		}
+		else
+		{
+			weapon->GetWeaponCollisionBox()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			OverlapActors.Empty();
+		}
+	}
+	//todo:handle body collision boxes
+}
+
+void UPawnCombatComponent::OnHitTargetActor(AActor* HitActor)
+{
+}
+
+void UPawnCombatComponent::OnWeaponPullFromTargetActor(AActor* InteractedActor)
+{
 }
 

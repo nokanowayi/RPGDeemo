@@ -7,6 +7,13 @@
 #include "Component/PawnExtensionComponentBase.h"
 #include "PawnCombatComponent.generated.h"
 
+UENUM()
+enum class EToggleDamageType:uint8
+{
+	CurrentEquippedWeapon,
+	LeftHand,
+	RightHand,
+};
 /**
  * 
  */
@@ -25,7 +32,15 @@ public:
 	FGameplayTag CurrentEquippedWeaponTag;
 
 	UFUNCTION(blueprintCallable,category="Warrior|Combat")
-	AWarriorWeaponBase* GetCharacterCurrentEquippedWeapon(FGameplayTag InWeaponTagToGet) const;
+	AWarriorWeaponBase* GetCharacterCurrentEquippedWeapon() const;
+
+	UFUNCTION(blueprintCallable,category="Warrior|Combat")
+	void ToggleWeaponColiision(bool bShouldEnable,EToggleDamageType ToggleDamageType = EToggleDamageType::CurrentEquippedWeapon);
+
+	virtual void OnHitTargetActor(AActor* HitActor);
+	virtual void OnWeaponPullFromTargetActor(AActor* InteractedActor);
+protected:
+	TArray<AActor*> OverlapActors;
 private:
 	TMap<FGameplayTag,AWarriorWeaponBase*> CharacterCarriedWeaponsMap;
 };

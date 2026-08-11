@@ -20,4 +20,13 @@ class RPGDEEMO_API UHeroCombatComponent : public UPawnCombatComponent
 public:
 	UFUNCTION(blueprintCallable,category="Warrior|Combat")
 	AWarriorHeroWeapon* GetHeroCarriedWeaponByTag(FGameplayTag InWeaponTag) const;
+
+	UFUNCTION(blueprintCallable,category="Warrior|Combat")
+	AWarriorHeroWeapon* GetHeroCurrentEquippedWeapon() const;
+
+	UFUNCTION(blueprintCallable,category="Warrior|Combat")
+	float GetHeroCurrentEquippedWeaponDamageAtLevel(float InLevel) const;
+	
+	virtual void OnHitTargetActor(AActor* HitActor) override;
+	virtual void OnWeaponPullFromTargetActor(AActor* InteractedActor) override;
 };

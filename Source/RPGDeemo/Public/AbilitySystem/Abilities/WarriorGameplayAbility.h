@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
+#include "WarriorTypes/WarriorEnumTypes.h"
 #include "WarriorGameplayAbility.generated.h"
 
 class UPawnCombatComponent;
@@ -37,4 +38,9 @@ protected:
 
 	UFUNCTION(BlueprintPure,Category="Warrior|Ability")
 	UWarriorAbilitySystemComponent* GetWarriorAbilitySystemComponent() const;
+
+	FActiveGameplayEffectHandle NativeApplyGameplaySpecEffectHandleToTarget(AActor* TargetActor, const FGameplayEffectSpecHandle& InSpecHandle) const;
+	
+	UFUNCTION(BlueprintCallable,Category="Warrior|Ability",meta = (DisplayName = "Apply Gameplay Effect Spec Handle To Target Actor", ExpandEnumAsExecs = "SuccessType"))
+	FActiveGameplayEffectHandle BP_ApplyGameplaySpecEffectHandleToTarget(AActor* TargetActor, const FGameplayEffectSpecHandle& InSpecHandle,EWarriorSuccessType& SuccessType);
 };

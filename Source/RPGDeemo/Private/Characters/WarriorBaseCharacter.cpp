@@ -22,6 +22,11 @@ UAbilitySystemComponent* AWarriorBaseCharacter::GetAbilitySystemComponent() cons
 	return GetWarriorAbilitySystemComponent();
 }
 
+UPawnCombatComponent* AWarriorBaseCharacter::GetPawnCombatComponent() const
+{
+	return nullptr;
+}
+
 void AWarriorBaseCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
@@ -29,6 +34,11 @@ void AWarriorBaseCharacter::PossessedBy(AController* NewController)
 	if (WarriorAbilitySystemComponent)
 	{
 		WarriorAbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+		if (WarriorAttributeSet)
+		{
+			WarriorAbilitySystemComponent->AddAttributeSetSubobject(WarriorAttributeSet);
+		}
 
 		ensureMsgf(!CharacterStartUpData.IsNull(), TEXT("CharacterStartUpData is null, please assign CharacterStartUpData in %s"), *GetName());
 	}

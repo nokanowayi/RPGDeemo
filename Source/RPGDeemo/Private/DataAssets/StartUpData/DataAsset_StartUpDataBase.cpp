@@ -10,6 +10,14 @@ void UDataAsset_StartUpDataBase::GiveToAbilitySystemComponent(UWarriorAbilitySys
 	 check(InASCToGive);
 	GrantAbilities(ActivateOnGivenAbilities,InASCToGive,ApplyLevel);
 	GrantAbilities(ReactiveAbilities,InASCToGive,ApplyLevel);
+	if (!StartUpGameplayEffect.IsEmpty())
+	{
+		for (const TSubclassOf<UGameplayEffect> Effect : StartUpGameplayEffect)
+		{
+			if (!Effect)continue;
+			InASCToGive->ApplyGameplayEffectToSelf(Effect.GetDefaultObject(),ApplyLevel,InASCToGive->MakeEffectContext());
+		}
+	}
 }
 
 void UDataAsset_StartUpDataBase::GrantAbilities(const TArray<TSubclassOf<UWarriorGameplayAbility>> InAbilityToGive,

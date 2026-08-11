@@ -18,6 +18,7 @@ class RPGDEEMO_API AWarriorEnemyCharacter : public AWarriorBaseCharacter
 public:
 	AWarriorEnemyCharacter();
 
+	virtual  UPawnCombatComponent* GetPawnCombatComponent() const override;
 protected:
 	virtual void PossessedBy(AController* NewController) override;
 	

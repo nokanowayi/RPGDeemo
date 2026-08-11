@@ -22,6 +22,7 @@ class RPGDEEMO_API AWarriorHeroCharacter : public AWarriorBaseCharacter
 
 public:
 	AWarriorHeroCharacter();
+	virtual  UPawnCombatComponent* GetPawnCombatComponent() const override;
 protected:
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

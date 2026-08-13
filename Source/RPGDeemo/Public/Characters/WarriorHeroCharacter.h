@@ -8,6 +8,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "InputActionValue.h"
 #include "GameplayTagContainer.h"
+#include "Component/UI/HeroUIComponent.h"
 #include "WarriorHeroCharacter.generated.h"
 
 class  UHeroCombatComponent;
@@ -38,6 +39,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat",meta = (AllowPrivateAccess = "true"))
 	UHeroCombatComponent* HeroCombatComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI",meta = (AllowPrivateAccess = "true"))
+	UHeroUIComponent* HeroUIComponent;
 #pragma endregion
 
 #pragma region Input
@@ -53,5 +57,7 @@ private:
 public:
 	FORCEINLINE UDataAsset_InputConfig* GetInputConfig() const { return InputConfig; }
 	FORCEINLINE UHeroCombatComponent* GetHeroCombatComponent() const { return HeroCombatComponent; }
+	virtual UPawnUIComponent* GetPawnUIComponent() const override;
+	virtual UHeroUIComponent* GetHeroUIComponent() const override;
 };
 

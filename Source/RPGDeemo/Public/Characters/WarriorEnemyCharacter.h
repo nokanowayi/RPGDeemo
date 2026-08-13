@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Characters/WarriorBaseCharacter.h"
 #include "Component/Combat/EnemyCombatComponent.h"
+#include "Component/UI/EnemyUIComponent.h"
 #include "WarriorEnemyCharacter.generated.h"
 
 /**
@@ -19,11 +20,16 @@ public:
 	AWarriorEnemyCharacter();
 
 	virtual  UPawnCombatComponent* GetPawnCombatComponent() const override;
+	virtual UPawnUIComponent* GetPawnUIComponent() const override;
+	virtual UEnemyUIComponent* GetEnemyUIComponent() const override;
 protected:
 	virtual void PossessedBy(AController* NewController) override;
 	
 	UPROPERTY(visibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	UEnemyCombatComponent* EnemyCombatComponent;
+
+	UPROPERTY(visibleAnywhere, BlueprintReadOnly, Category = "UI")
+	UEnemyUIComponent* EnemyUIComponent;
 
 	private:
 	void InitEnemyStartUpData();

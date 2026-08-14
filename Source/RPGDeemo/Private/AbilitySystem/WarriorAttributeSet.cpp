@@ -50,7 +50,7 @@ void UWarriorAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffec
 		const float NewCurrentHealth = FMath::Clamp(GetCurrentHealth(), 0.f, GetMaxHealth());
 		
 		SetCurrentHealth(NewCurrentHealth);
-		PawnUIComponent->OnCurrentHealthChanged.Broadcast(NewCurrentHealth);
+		PawnUIComponent->OnCurrentHealthChanged.Broadcast(GetCurrentHealth() / GetMaxHealth());
 	}
 	
 	if (Data.EvaluatedData.Attribute == GetMaxRageAttribute())

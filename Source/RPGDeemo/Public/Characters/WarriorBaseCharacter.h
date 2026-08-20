@@ -13,6 +13,7 @@
 
 class UWarriorAbilitySystemComponent;
 class UWarriorAttributeSet;
+class UMotionWarpingComponent;
 
 UCLASS()
 class RPGDEEMO_API AWarriorBaseCharacter : public ACharacter,public IAbilitySystemInterface,public IPawnCombatInterface,public IPawnUIInterface
@@ -37,6 +38,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "CharacterData")
 	TSoftObjectPtr<UDataAsset_StartUpDataBase> CharacterStartUpData;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "MotionWarping")
+	UMotionWarpingComponent* MotionWarpingComponent;
 public:
 	UFUNCTION(BlueprintCallable, Category = "Ability")
 	FORCEINLINE UWarriorAbilitySystemComponent* GetWarriorAbilitySystemComponent() const { return WarriorAbilitySystemComponent; }

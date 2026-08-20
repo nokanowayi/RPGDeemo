@@ -32,6 +32,10 @@
 		{
 			"Name": "UEBridgeMCP",
 			"Enabled": true
+		},
+		{
+			"Name": "MotionWarping",
+			"Enabled": true
 		}
 	]
 }

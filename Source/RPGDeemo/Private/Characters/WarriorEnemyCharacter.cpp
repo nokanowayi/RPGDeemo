@@ -20,7 +20,7 @@ AWarriorEnemyCharacter::AWarriorEnemyCharacter()
 	bUseControllerRotationYaw = false;
 
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;
-	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 	GetCharacterMovement()->RotationRate = FRotator(0.f,180.f,0.f);
 	GetCharacterMovement()->BrakingDecelerationWalking = 1000.f;

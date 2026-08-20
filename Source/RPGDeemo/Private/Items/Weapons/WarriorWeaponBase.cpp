@@ -4,6 +4,7 @@
 #include "Items/Weapons/WarriorWeaponBase.h"
 
 #include "WarriorDebugHelper.h"
+#include "WarriorFunctionLibrary.h"
 #include "components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -30,7 +31,7 @@ void AWarriorWeaponBase::OnWeaponOverlapBegin(UPrimitiveComponent* OverlappedCom
 	APawn* WeaponInstigator = GetInstigator<APawn>();
 	if (APawn* HitPawn = Cast<APawn>(OtherActor))
 	{
-		if (HitPawn != WeaponInstigator)
+		if (UWarriorFunctionLibrary::IsTargetPawnHostile(WeaponInstigator, HitPawn))
 		{
 			OnWeaponHitTarget.ExecuteIfBound(OtherActor);
 		}
@@ -43,7 +44,7 @@ void AWarriorWeaponBase::OnCollisionBoxEndOverlap(UPrimitiveComponent* Overlappe
 	APawn* WeaponInstigator = GetInstigator<APawn>();
 	if (APawn* HitPawn = Cast<APawn>(OtherActor))
 	{
-		if (HitPawn != WeaponInstigator)
+		if (UWarriorFunctionLibrary::IsTargetPawnHostile(WeaponInstigator, HitPawn))
 		{
 			OnWeaponPulledFromTarget.ExecuteIfBound(OtherActor);
 		}

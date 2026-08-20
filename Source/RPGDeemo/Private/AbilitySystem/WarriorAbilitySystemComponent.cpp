@@ -53,3 +53,26 @@ void UWarriorAbilitySystemComponent::RemoveGrantedHeroWeaponAbilities(
 	}
 }
 
+bool UWarriorAbilitySystemComponent::TryActivateAbilityByTag(FGameplayTag AbilityTagToActivate)
+{
+	check(AbilityTagToActivate.IsValid());
+
+	TArray<FGameplayAbilitySpec*> AbilitySpecs;
+	GetActivatableGameplayAbilitySpecsByAllMatchingTags(AbilityTagToActivate.GetSingleTagContainer(),AbilitySpecs);
+
+	if (AbilitySpecs.Num() != 0)
+	{
+		const int32 RandomAbilityIndex = FMath::RandRange(0, AbilitySpecs.Num() - 1);
+		FGameplayAbilitySpec* SpecToActivate = AbilitySpecs[RandomAbilityIndex];
+
+		check(SpecToActivate);
+		if (!SpecToActivate->IsActive())
+		{
+			return TryActivateAbility(SpecToActivate->Handle);
+		}
+
+
+	}
+	return false;
+}
+

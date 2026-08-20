@@ -34,14 +34,9 @@ FGameplayEffectSpecHandle UWarriorHeroGameplayAbility::MakeHeroDamageEffectSpecH
 	int32 InUsedComboCount)
 {
 	check(EffectClass);
-
-	UE_LOG(LogTemp, Warning, TEXT("=== MakeHeroDamageEffectSpecHandle ==="));
-	UE_LOG(LogTemp, Warning, TEXT("EffectClass: %s, WeaponBaseDamage: %.1f, AttackTypeTag: %s, UsedComboCount: %d"),
-		*EffectClass->GetName(), InWeaponBaseDamage, *InCurrentAttackTypeTag.ToString(), InUsedComboCount);
+	
 
 	float AbilityLevel = GetAbilityLevel();
-	UE_LOG(LogTemp, Warning, TEXT("AbilityLevel: %.1f, IsInstantiated: %d, IsActive: %d"),
-		AbilityLevel, IsInstantiated() ? 1 : 0, IsActive() ? 1 : 0);
 
 	FGameplayEffectContextHandle Handle = GetWarriorAbilitySystemComponent()->MakeEffectContext();
 	Handle.SetAbility(this);
@@ -49,11 +44,7 @@ FGameplayEffectSpecHandle UWarriorHeroGameplayAbility::MakeHeroDamageEffectSpecH
 	Handle.AddInstigator(GetAvatarActorFromActorInfo(),GetAvatarActorFromActorInfo());
 
 	FGameplayEffectSpecHandle SpecHandle = GetWarriorAbilitySystemComponent()->MakeOutgoingSpec(EffectClass, AbilityLevel, Handle);
-
-	UE_LOG(LogTemp, Warning, TEXT("SpecHandle valid: %d, Data valid: %d, Def: %s"),
-		SpecHandle.IsValid() ? 1 : 0,
-		SpecHandle.Data.IsValid() ? 1 : 0,
-		(SpecHandle.Data.IsValid() && SpecHandle.Data->Def) ? *SpecHandle.Data->Def->GetName() : TEXT("NULL"));
+	
 
 	SpecHandle.Data->SetSetByCallerMagnitude(WarriorGameplayTags::Shared_SetByCaller_BaseDamage, InWeaponBaseDamage);
 

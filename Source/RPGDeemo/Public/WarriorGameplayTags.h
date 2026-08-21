@@ -38,6 +38,7 @@ namespace WarriorGameplayTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Weapon);
 
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Status_Strafing);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Status_UnderAttack);
 
 	/** Shared Tags **/
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Shared_Ability_HitReact);

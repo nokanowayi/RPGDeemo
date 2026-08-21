@@ -39,4 +39,13 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Warrior|FunctionLibrary")
 	static bool IsTargetPawnHostile(APawn* QueryPawn, APawn* TargetPawn);
+
+	UFUNCTION(BlueprintPure, Category = "Warrior|FunctionLibrary",meta = (CompactNodeTitle = "Get Value At Level"))
+	static float GetScalableFloatValueAtLevel(const FScalableFloat& InScalableFloat, int32 InLevel = 1);
+
+	UFUNCTION(BlueprintPure, Category = "Warrior|FunctionLibrary")
+	static FGameplayTag ComputeHitReactDirTag(AActor* InAttacker,AActor* InVictim,float& OutAngelDifference);
+
+	UFUNCTION(BlueprintPure, Category = "Warrior|FunctionLibrary")
+	static bool IsValidBlock(AActor* InAttacker,AActor* InDefender);
 };

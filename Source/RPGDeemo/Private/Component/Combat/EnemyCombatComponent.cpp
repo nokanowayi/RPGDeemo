@@ -5,6 +5,7 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "WarriorDebugHelper.h"
+#include "WarriorFunctionLibrary.h"
 #include "WarriorGameplayTags.h"
 
 void UEnemyCombatComponent::OnHitTargetActor(AActor* HitActor)
@@ -20,12 +21,12 @@ void UEnemyCombatComponent::OnHitTargetActor(AActor* HitActor)
 
 		bool BIsValidBlock = false;
 
-		const bool BIsPlayerBlocking = false;
+		const bool BIsPlayerBlocking = UWarriorFunctionLibrary::NativeDoesActorHaveTag(HitActor, WarriorGameplayTags::Player_Status_Blocking);
 		const bool BIsMyAttackingUnblockable = false;
 
 		if (BIsPlayerBlocking && !BIsMyAttackingUnblockable)
 		{
-			
+			BIsValidBlock = UWarriorFunctionLibrary::IsValidBlock(GetOwningPawn(), HitActor);
 		}
 
 		FGameplayEventData EventData;
@@ -34,7 +35,7 @@ void UEnemyCombatComponent::OnHitTargetActor(AActor* HitActor)
 		
 		if (BIsValidBlock)
 		{
-			
+			Debug::Print(TEXT("Blocked"));
 		}
 		else
 		{

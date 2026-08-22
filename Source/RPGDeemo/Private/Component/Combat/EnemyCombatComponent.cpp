@@ -35,7 +35,11 @@ void UEnemyCombatComponent::OnHitTargetActor(AActor* HitActor)
 		
 		if (BIsValidBlock)
 		{
-			Debug::Print(TEXT("Blocked"));
+			UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(
+				HitActor,
+				WarriorGameplayTags::Player_Event_SuccessfulBlock,
+				EventData
+				);
 		}
 		else
 		{

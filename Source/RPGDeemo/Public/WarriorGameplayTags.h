@@ -16,6 +16,9 @@ namespace WarriorGameplayTags
 	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_MustBeHeld);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_MustBeHeld_Block);
+
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Toggleable);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Toggleable_TargetLock);
     /** Player **/
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Ability_Equip_Axe);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Ability_Unequip_Axe);
@@ -24,16 +27,19 @@ namespace WarriorGameplayTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Ability_HitPause);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Ability_Roll);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Ability_Block);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Ability_TargetLock);
 	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Weapon_Axe);
 
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Event_Equip_Axe);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Event_Unequip_Axe);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Event_HitPause);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Event_SuccessfulBlock);
 
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Status_JumpToFinisher);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Status_Rolling);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Status_Blocking);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Status_TargetLocking);
 	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_SetByCaller_AttackType_Light);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_SetByCaller_AttackType_Heavy);

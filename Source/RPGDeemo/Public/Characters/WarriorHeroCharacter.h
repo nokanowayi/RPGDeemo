@@ -24,6 +24,7 @@ class RPGDEEMO_API AWarriorHeroCharacter : public AWarriorBaseCharacter
 public:
 	AWarriorHeroCharacter();
 	virtual  UPawnCombatComponent* GetPawnCombatComponent() const override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 protected:
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -50,6 +51,8 @@ private:
 
 	void Input_Move(const FInputActionValue& InputActionValue);
 	void Input_Look(const FInputActionValue& InputActionValue);
+	void Input_SwitchTargetTriggered(const FInputActionValue& InputActionValue);
+	void Input_SwitchTargetCompleted(const FInputActionValue& InputActionValue);
 	void Input_AbilityInputPressed(FGameplayTag InInputTag);
 	void Input_AbilityInputReleased(FGameplayTag InInputTag);
 #pragma endregion

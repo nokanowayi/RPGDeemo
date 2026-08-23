@@ -36,6 +36,14 @@
 		{
 			"Name": "MotionWarping",
 			"Enabled": true
+		},
+		{
+			"Name": "OnlineSubsystem",
+			"Enabled": true
+		},
+		{
+			"Name": "OnlineSubsystemNull",
+			"Enabled": true
 		}
 	]
 }

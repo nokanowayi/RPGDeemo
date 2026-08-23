@@ -25,20 +25,40 @@ public:
 	UWarriorAttributeSet();
 
 	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
-	
-	UPROPERTY(BlueprintReadOnly, Category = "Health")
+
+	// ===== 多人复制通知（客户端收到属性变化时刷新UI） =====
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	/** 复制通知：客户端收到新血量时调用（刷新血条） */
+	UFUNCTION()
+	virtual void OnRep_CurrentHealth(const FGameplayAttributeData& OldCurrentHealth);
+
+	UFUNCTION()
+	virtual void OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth);
+
+	UFUNCTION()
+	virtual void OnRep_CurrentRage(const FGameplayAttributeData& OldCurrentRage);
+
+	UFUNCTION()
+	virtual void OnRep_MaxRage(const FGameplayAttributeData& OldMaxRage);
+
+	/** 复制通知后广播UI更新 */
+	void BroadcastHealthChanged() const;
+	void BroadcastRageChanged() const;
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentHealth, Category = "Health")
 	FGameplayAttributeData CurrentHealth;
 	ATTRIBUTE_ACCESSORS(UWarriorAttributeSet,CurrentHealth)
 
-	UPROPERTY(BlueprintReadOnly, Category = "Health")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxHealth, Category = "Health")
 	FGameplayAttributeData MaxHealth;
 	ATTRIBUTE_ACCESSORS(UWarriorAttributeSet,MaxHealth)
 	
-	UPROPERTY(BlueprintReadOnly, Category = "Rage")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentRage, Category = "Rage")
 	FGameplayAttributeData CurrentRage;
 	ATTRIBUTE_ACCESSORS(UWarriorAttributeSet,CurrentRage)
 
-	UPROPERTY(BlueprintReadOnly, Category = "Rage")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxRage, Category = "Rage")
 	FGameplayAttributeData MaxRage;
 	ATTRIBUTE_ACCESSORS(UWarriorAttributeSet,MaxRage)
 

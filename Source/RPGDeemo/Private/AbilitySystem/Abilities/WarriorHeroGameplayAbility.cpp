@@ -21,6 +21,9 @@ AWarriorHeroController* UWarriorHeroGameplayAbility::GetHeroController()
 	{
 		CachedWarriorHeroController = Cast<AWarriorHeroController>(GetHeroCharacter()->GetController());
 	}
+	UE_LOG(LogTemp, Warning, TEXT("[HUD] GetHeroController: AvatarActor=%s Controller=%s"),
+		GetAvatarActorFromActorInfo() ? *GetAvatarActorFromActorInfo()->GetName() : TEXT("NULL"),
+		CachedWarriorHeroController.IsValid() ? *CachedWarriorHeroController.Get()->GetName() : TEXT("NULL"));
 	return CachedWarriorHeroController.IsValid()?CachedWarriorHeroController.Get():nullptr;
 }
 

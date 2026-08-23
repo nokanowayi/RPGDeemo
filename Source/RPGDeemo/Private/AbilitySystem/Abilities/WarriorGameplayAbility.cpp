@@ -29,9 +29,14 @@ void UWarriorGameplayAbility::EndAbility(const FGameplayAbilitySpecHandle Handle
 
 	if (AbilityActivationPolicy == EWarriorAbilityActivationPolicy::OnGiven)
 	{
-		if (ActorInfo)
+		if (ActorInfo && ActorInfo->AbilitySystemComponent.IsValid())
 		{
-			ActorInfo->AbilitySystemComponent->ClearAbility(Handle);
+			// ClearAbility 只能在服务器调用，客户端跳过
+			if (ActorInfo->AbilitySystemComponent->GetOwnerActor() &&
+				ActorInfo->AbilitySystemComponent->GetOwnerActor()->HasAuthority())
+			{
+				ActorInfo->AbilitySystemComponent->ClearAbility(Handle);
+			}
 		}
 	}
 }

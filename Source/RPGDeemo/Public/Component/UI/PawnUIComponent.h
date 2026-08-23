@@ -18,4 +18,7 @@ class RPGDEEMO_API UPawnUIComponent : public UPawnExtensionComponentBase
 	public:
 	UPROPERTY(BlueprintAssignable)
 	FOnPercentChangedDelegate OnCurrentHealthChanged;
+	
+	UFUNCTION(BlueprintCallable, Category = "Warrior|UI")
+	void BroadcastCurrentHealthState();
 };

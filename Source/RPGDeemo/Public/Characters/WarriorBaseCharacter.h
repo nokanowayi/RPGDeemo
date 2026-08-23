@@ -30,6 +30,29 @@ public:
 	virtual UPawnUIComponent* GetPawnUIComponent() const override;
 protected:
 	virtual void PossessedBy(AController* NewController) override;
+
+	/** 客户端复制 PlayerState 后初始化 ASC（玩家用） */
+	virtual void OnRep_PlayerState() override;
+
+	/** 复制注册（属性复制声明） */
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	/** 客户端收到"服务器已初始化ASC"标记后，初始化本端 ASC（敌人无PlayerState，靠这个） */
+	UFUNCTION()
+	virtual void OnRep_AbilitySystemInitialized();
+
+	/** 客户端初始化 ASC（玩家走 OnRep_PlayerState，敌人走 OnRep_AbilitySystemInitialized） */
+	void InitializeAbilitySystemForClient();
+
+	/** 客户端 ASC 初始化后，激活 OnGiven 策略的能力（如 HUD 创建） */
+	void ActivateOnGivenAbilitiesForClient();
+
+	/** 尝试激活 OnGiven 能力，返回是否找到 */
+	bool TryActivateOnGivenAbilities();
+
+	/** OnGiven 能力重试计数（等能力列表复制完成） */
+	int32 OnGivenRetryCount = 0;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AbilitySystem")
 	UWarriorAbilitySystemComponent* WarriorAbilitySystemComponent;
 
@@ -41,6 +64,10 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "MotionWarping")
 	UMotionWarpingComponent* MotionWarpingComponent;
+
+	/** 服务器初始化ASC后置true并复制，客户端据此初始化本端ASC */
+	UPROPERTY(ReplicatedUsing = OnRep_AbilitySystemInitialized)
+	bool bAbilitySystemInitialized = false;
 public:
 	UFUNCTION(BlueprintCallable, Category = "Ability")
 	FORCEINLINE UWarriorAbilitySystemComponent* GetWarriorAbilitySystemComponent() const { return WarriorAbilitySystemComponent; }

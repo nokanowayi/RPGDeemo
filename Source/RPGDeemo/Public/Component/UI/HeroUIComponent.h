@@ -20,4 +20,8 @@ public:
 
 	UPROPERTY(BlueprintCallable,BlueprintAssignable)
 	FOnEquippedWeaponChangedDelegate OnEquippedWeaponChanged;
+
+	/** 广播当前怒气百分比（Widget 绑定完成后调用） */
+	UFUNCTION(BlueprintCallable, Category = "Warrior|UI")
+	void BroadcastCurrentRageState();
 };

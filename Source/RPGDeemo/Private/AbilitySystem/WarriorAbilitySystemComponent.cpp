@@ -69,6 +69,8 @@ void UWarriorAbilitySystemComponent::RemoveGrantedHeroWeaponAbilities(
 	TArray<FGameplayAbilitySpecHandle>& InSpeHandlesToRemove)
 {
 	if (InSpeHandlesToRemove.IsEmpty()) return;
+	// ClearAbility 只能在服务器调用（引擎限制），客户端跳过
+	if (GetOwnerActor() && !GetOwnerActor()->HasAuthority()) return;
 	for (const FGameplayAbilitySpecHandle& SpecHandle : InSpeHandlesToRemove)
 	{
 		Debug::Print(FString::Printf(TEXT("RemoveGrantedHeroWeaponAbilities: %s"), *SpecHandle.ToString()));
@@ -76,8 +78,9 @@ void UWarriorAbilitySystemComponent::RemoveGrantedHeroWeaponAbilities(
 		{
 			ClearAbility(SpecHandle);
 		}
-		InSpeHandlesToRemove.Empty();
 	}
+	// 循环结束后统一清空，避免迭代器失效
+	InSpeHandlesToRemove.Empty();
 }
 
 bool UWarriorAbilitySystemComponent::TryActivateAbilityByTag(FGameplayTag AbilityTagToActivate)

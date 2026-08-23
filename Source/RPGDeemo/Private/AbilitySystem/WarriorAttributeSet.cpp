@@ -3,6 +3,7 @@
 
 #include "AbilitySystem/WarriorAttributeSet.h"
 #include "GameplayEffectExtension.h"
+#include "Net/UnrealNetwork.h"
 #include "WarriorDebugHelper.h"
 #include "WarriorFunctionLibrary.h"
 #include "WarriorGameplayTags.h"
@@ -16,6 +17,78 @@ UWarriorAttributeSet::UWarriorAttributeSet()
 	InitMaxRage(1.f);
 	InitAttackPower(1.F);
 	InitDefensePower(1.f);
+}
+
+void UWarriorAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME_CONDITION_NOTIFY(UWarriorAttributeSet, CurrentHealth, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UWarriorAttributeSet, MaxHealth, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UWarriorAttributeSet, CurrentRage, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UWarriorAttributeSet, MaxRage, COND_None, REPNOTIFY_Always);
+}
+
+void UWarriorAttributeSet::OnRep_CurrentHealth(const FGameplayAttributeData& OldCurrentHealth)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UWarriorAttributeSet, CurrentHealth, OldCurrentHealth);
+	BroadcastHealthChanged();
+}
+
+void UWarriorAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UWarriorAttributeSet, MaxHealth, OldMaxHealth);
+	BroadcastHealthChanged();
+}
+
+void UWarriorAttributeSet::OnRep_CurrentRage(const FGameplayAttributeData& OldCurrentRage)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UWarriorAttributeSet, CurrentRage, OldCurrentRage);
+	BroadcastRageChanged();
+}
+
+void UWarriorAttributeSet::OnRep_MaxRage(const FGameplayAttributeData& OldMaxRage)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UWarriorAttributeSet, MaxRage, OldMaxRage);
+	BroadcastRageChanged();
+}
+
+void UWarriorAttributeSet::BroadcastHealthChanged() const
+{
+	AActor* AvatarActor = GetOwningActor();
+	if (!AvatarActor)
+	{
+		Debug::Print(TEXT("BroadcastHealthChanged: AvatarActor=NULL"), FColor::Red, 8.f);
+		return;
+	}
+
+	IPawnUIInterface* PawnUIInterface = CachedPawnUIInterface.IsValid() ?
+		CachedPawnUIInterface.Get() : Cast<IPawnUIInterface>(AvatarActor);
+
+	if (UPawnUIComponent* PawnUIComponent = PawnUIInterface ? PawnUIInterface->GetPawnUIComponent() : nullptr)
+	{
+		PawnUIComponent->OnCurrentHealthChanged.Broadcast(GetCurrentHealth() / GetMaxHealth());
+	}
+}
+
+void UWarriorAttributeSet::BroadcastRageChanged() const
+{
+	AActor* AvatarActor = GetOwningActor();
+	if (!AvatarActor)
+	{
+		return;
+	}
+
+	IPawnUIInterface* PawnUIInterface = CachedPawnUIInterface.IsValid() ?
+		CachedPawnUIInterface.Get() : Cast<IPawnUIInterface>(AvatarActor);
+
+	if (PawnUIInterface)
+	{
+		if (UHeroUIComponent* HeroUIComponent = PawnUIInterface->GetHeroUIComponent())
+		{
+			HeroUIComponent->OnCurrentRageChanged.Broadcast(GetCurrentRage() / GetMaxRage());
+		}
+	}
 }
 
 void UWarriorAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data)
@@ -87,11 +160,12 @@ void UWarriorAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffec
 
 		const float NewCurrentHealth = FMath::Clamp(OldCurrentHealth - DamageToApply, 0.f, GetMaxHealth());
 		SetCurrentHealth(NewCurrentHealth);
-		Debug::Print(TEXT("NewCurrentHealth"), NewCurrentHealth, FColor::Green, 2.f);
+		
 		
 		PawnUIComponent->OnCurrentHealthChanged.Broadcast(GetCurrentHealth() / GetMaxHealth());
 		
 		if (NewCurrentHealth == 0.f){
+			Debug::Print(TEXT("Dead"),  FColor::Green, 2.f);
 			UWarriorFunctionLibrary::AddGameplayTagToActorIfNone(Data.Target.GetAvatarActor(), WarriorGameplayTags::Shared_Status_Dead);
 		}
 	}

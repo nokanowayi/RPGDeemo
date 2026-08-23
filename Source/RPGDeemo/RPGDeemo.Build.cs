@@ -16,7 +16,7 @@ public class RPGDeemo : ModuleRules
 			PrivateDependencyModuleNames.Add("GameplayDebugger");
 		}
 
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
+		PrivateDependencyModuleNames.AddRange(new string[] { "OnlineSubsystem", "OnlineSubsystemUtils" });
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

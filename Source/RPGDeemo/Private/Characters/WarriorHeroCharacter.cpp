@@ -5,6 +5,7 @@
 
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "WarriorDebugHelper.h"
 #include "WarriorGameplayTags.h"
 #include "Components/CapsuleComponent.h"
@@ -65,13 +66,22 @@ void AWarriorHeroCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	if (!CharacterStartUpData.IsNull())
+	// 只在服务器端给能力，客户端通过复制获取
+	if (!CharacterStartUpData.IsNull() && HasAuthority())
 	{
 		if(UDataAsset_StartUpDataBase* LoadData = CharacterStartUpData.LoadSynchronous())
 		{
 			LoadData->GiveToAbilitySystemComponent(GetWarriorAbilitySystemComponent(), 1);
 		}
 	}
+}
+
+void AWarriorHeroCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// 角色 Transform 由 CharacterMovement 自动复制，无需手动声明
+	// 如需复制自定义属性（如装备状态），在这里 DOREPLIFETIME
 }
 
 void AWarriorHeroCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -87,14 +97,15 @@ void AWarriorHeroCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 	UWarrriorInputComponent* WarriorInputComponent = CastChecked<UWarrriorInputComponent>(PlayerInputComponent);
 	WarriorInputComponent->BindNativeInputAction(InputConfig, WarriorGameplayTags::InputTag_Move, ETriggerEvent::Triggered,this, &AWarriorHeroCharacter::Input_Move);
 	WarriorInputComponent->BindNativeInputAction(InputConfig, WarriorGameplayTags::InputTag_Look, ETriggerEvent::Triggered,this, &AWarriorHeroCharacter::Input_Look);
-
+	WarriorInputComponent->BindNativeInputAction(InputConfig, WarriorGameplayTags::InputTag_SwitchTarget, ETriggerEvent::Triggered,this, &AWarriorHeroCharacter::Input_SwitchTargetTriggered);
+	WarriorInputComponent->BindNativeInputAction(InputConfig, WarriorGameplayTags::InputTag_SwitchTarget, ETriggerEvent::Completed,this, &AWarriorHeroCharacter::Input_SwitchTargetCompleted);
+	
 	WarriorInputComponent->BindAbilityInputAction(InputConfig, this, &AWarriorHeroCharacter::Input_AbilityInputPressed, &AWarriorHeroCharacter::Input_AbilityInputReleased);
 }
 
 void AWarriorHeroCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	Debug::Print(TEXT("Working"));
 }
 
 void AWarriorHeroCharacter::Input_Move(const FInputActionValue& InputActionValue)
@@ -126,6 +137,14 @@ void AWarriorHeroCharacter::Input_Look(const FInputActionValue& InputActionValue
 	{
 		AddControllerPitchInput(-lookVector.Y);
 	}
+}
+
+void AWarriorHeroCharacter::Input_SwitchTargetTriggered(const FInputActionValue& InputActionValue)
+{
+}
+
+void AWarriorHeroCharacter::Input_SwitchTargetCompleted(const FInputActionValue& InputActionValue)
+{
 }
 
 void AWarriorHeroCharacter::Input_AbilityInputPressed(FGameplayTag InInputTag)

@@ -13,6 +13,7 @@ namespace WarriorGameplayTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_LightAttack_Axe);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_HeavyAttack_Axe);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Roll);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_SwitchTarget);
 	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_MustBeHeld);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_MustBeHeld_Block);

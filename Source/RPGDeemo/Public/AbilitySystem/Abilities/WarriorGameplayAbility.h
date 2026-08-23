@@ -32,7 +32,16 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly,Category="WarriorAbility")
 	EWarriorAbilityActivationPolicy AbilityActivationPolicy = EWarriorAbilityActivationPolicy::OnTrigger;
-	
+
+public:
+	/** 判断是否为 OnGiven 激活策略（客户端初始化时需要激活这类能力） */
+	FORCEINLINE bool IsOnGivenActivationPolicy() const
+	{
+		return AbilityActivationPolicy == EWarriorAbilityActivationPolicy::OnGiven;
+	}
+
+protected:
+
 	UFUNCTION(BlueprintPure,Category="Warrior|Ability")
 	UPawnCombatComponent* GetPawnCombatComponent() const;
 

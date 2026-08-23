@@ -49,7 +49,11 @@ void UPawnCombatComponent::ToggleWeaponColiision(bool bShouldEnable, EToggleDama
 	if (ToggleDamageType == EToggleDamageType::CurrentEquippedWeapon)
 	{
 		AWarriorWeaponBase* weapon = GetCharacterCurrentEquippedWeapon();
-		check(weapon);
+		if (!weapon)
+		{
+			// 未装备武器时安全跳过（例如：攻击动画已触发但武器尚未生成/注册）
+			return;
+		}
 		if (bShouldEnable)
 		{
 			weapon->GetWeaponCollisionBox()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);

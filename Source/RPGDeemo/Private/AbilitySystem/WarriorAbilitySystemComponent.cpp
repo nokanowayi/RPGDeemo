@@ -2,9 +2,48 @@
 
 #include "AbilitySystem/WarriorAbilitySystemComponent.h"
 #include "AbilitySystem//Abilities/WarriorHeroGameplayAbility.h"
+#include "Animation/AnimInstance.h"
+#include "GameplayAbilities/Public/Abilities/GameplayAbilityTypes.h"
 
 #include "WarriorDebugHelper.h"
 #include "WarriorGameplayTags.h"
+
+float UWarriorAbilitySystemComponent::PlayMontage(UGameplayAbility* AnimatingAbility,
+	FGameplayAbilityActivationInfo ActivationInfo, UAnimMontage* Montage, float InPlayRate,
+	FName StartSectionName, float StartTimeSeconds)
+{
+	UE_LOG(LogTemp, Warning, TEXT("[MONTAGE] PlayMontage: %s owner=%s authority=%d avatar=%s AnimInst=%s"),
+		Montage ? *Montage->GetName() : TEXT("NULL"),
+		GetOwnerActor() ? *GetOwnerActor()->GetName() : TEXT("NULL"),
+		GetOwnerActor() ? (GetOwnerActor()->HasAuthority() ? 1 : 0) : -1,
+		GetAvatarActor() ? *GetAvatarActor()->GetName() : TEXT("NULL"),
+		AbilityActorInfo.IsValid() && AbilityActorInfo->GetAnimInstance() ? *AbilityActorInfo->GetAnimInstance()->GetName() : TEXT("NULL"));
+	return Super::PlayMontage(AnimatingAbility, ActivationInfo, Montage, InPlayRate, StartSectionName, StartTimeSeconds);
+}
+
+float UWarriorAbilitySystemComponent::PlayMontageSimulated(UAnimMontage* Montage, float InPlayRate,
+	FName StartSectionName)
+{
+	UE_LOG(LogTemp, Warning, TEXT("[MONTAGE] PlayMontageSimulated: %s owner=%s avatar=%s AnimInst=%s authority=%d"),
+		Montage ? *Montage->GetName() : TEXT("NULL"),
+		GetOwnerActor() ? *GetOwnerActor()->GetName() : TEXT("NULL"),
+		GetAvatarActor() ? *GetAvatarActor()->GetName() : TEXT("NULL"),
+		AbilityActorInfo.IsValid() && AbilityActorInfo->GetAnimInstance() ? *AbilityActorInfo->GetAnimInstance()->GetName() : TEXT("NULL"),
+		GetOwnerActor() ? (GetOwnerActor()->HasAuthority() ? 1 : 0) : -1);
+	const float Result = Super::PlayMontageSimulated(Montage, InPlayRate, StartSectionName);
+	UE_LOG(LogTemp, Warning, TEXT("[MONTAGE] PlayMontageSimulated result: %f"), Result);
+	return Result;
+}
+
+void UWarriorAbilitySystemComponent::OnRep_ReplicatedAnimMontage()
+{
+	UE_LOG(LogTemp, Warning, TEXT("[MONTAGE] OnRep_ReplicatedAnimMontage: owner=%s avatar=%s AnimInst=%s Anim=%s"),
+		GetOwnerActor() ? *GetOwnerActor()->GetName() : TEXT("NULL"),
+		GetAvatarActor() ? *GetAvatarActor()->GetName() : TEXT("NULL"),
+		AbilityActorInfo.IsValid() && AbilityActorInfo->GetAnimInstance() ? *AbilityActorInfo->GetAnimInstance()->GetName() : TEXT("NULL"),
+		RepAnimMontageInfo.Animation ? *RepAnimMontageInfo.Animation->GetName() : TEXT("NULL"));
+	Super::OnRep_ReplicatedAnimMontage();
+}
 
 void UWarriorAbilitySystemComponent::OnAbilityInputPressed(FGameplayTag& InputTag)
 {

@@ -6,6 +6,7 @@
 #include "WarriorFunctionLibrary.h"
 
 #include "GenericTeamAgentInterface.h"
+#include "WarriorDebugHelper.h"
 #include "WarriorGameplayTags.h"
 #include "Interfaces/PawnCombatInterface.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -20,10 +21,14 @@ void UWarriorFunctionLibrary::AddGameplayTagToActorIfNone(AActor* InActor, FGame
 {
 
 	UWarriorAbilitySystemComponent* ASC = NativeGetWarriorASCFromActor(InActor);
-
+	
 	if (!ASC->HasMatchingGameplayTag(TagToAdd))
 	{
-		ASC->AddReplicatedLooseGameplayTags(FGameplayTagContainer(TagToAdd));
+		// AddLooseGameplayTag：更新本地 TagMap 并触发 OnTagCountChanged -> TriggerAbilityCheck（OwnedTagAdded 触发死亡能力）
+		// AddReplicatedLooseGameplayTag：仅加入复制容器（FMinimalReplicationTagCountMap），
+		//   不触发本地回调，但客户端收到复制后 UpdateOwnerTagMap 会触发回调（客户端需要本地授予能力才能响应）
+		ASC->AddLooseGameplayTag(TagToAdd);
+		ASC->AddReplicatedLooseGameplayTag(TagToAdd);
 	}
 	
 }
@@ -33,7 +38,8 @@ void UWarriorFunctionLibrary::RemoveGameplayTagFromActorIfFound(AActor* InActor,
 	UWarriorAbilitySystemComponent* ASC = NativeGetWarriorASCFromActor(InActor);
 	if (ASC->HasMatchingGameplayTag(TagToAdd))
 	{
-		ASC->RemoveReplicatedLooseGameplayTags(FGameplayTagContainer(TagToAdd));
+		ASC->RemoveLooseGameplayTag(TagToAdd);
+		ASC->RemoveReplicatedLooseGameplayTag(TagToAdd);
 	}
 }
 

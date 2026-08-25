@@ -3,6 +3,7 @@
 
 #include "AbilitySystem/Abilities/HeroGameplayAbility_TargetLock.h"
 
+#include "EnhancedInputSubsystems.h"
 #include "WarriorDebugHelper.h"
 #include "WarriorFunctionLibrary.h"
 #include "WarriorGameplayTags.h"
@@ -20,6 +21,7 @@ void UHeroGameplayAbility_TargetLock::ActivateAbility(const FGameplayAbilitySpec
 {
 	TryLockOnTarget();
 	InitTargetLockMovement();
+	InitTargetLockMappingContext();
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 }
 
@@ -29,6 +31,8 @@ void UHeroGameplayAbility_TargetLock::EndAbility(const FGameplayAbilitySpecHandl
 {
 	CleanUp();
 	ResetTargetMovement();
+	ResetTargetMappingContext();
+	
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
@@ -51,12 +55,39 @@ void UHeroGameplayAbility_TargetLock::OnTargetLockTick(float DeltaTime)
 	{
 		FRotator Rotator = UKismetMathLibrary::FindLookAtRotation(GetHeroCharacter()->GetActorLocation(),CurrentLockActor->GetActorLocation());
 
+		Rotator -= FRotator(TargetLockCameraDis,0,0);
 		FRotator ControllerRotator = GetHeroController()->GetControlRotation();
 
 		FRotator TargetRotator = FMath::RInterpTo(ControllerRotator,Rotator,DeltaTime,TargetLockCameraSpeed);
 
 		GetHeroController()->SetControlRotation(FRotator(TargetRotator.Pitch,TargetRotator.Yaw,ControllerRotator.Roll));
 		GetHeroCharacter()->SetActorRotation(FRotator(0.f,TargetRotator.Yaw,0.f));
+	}
+}
+
+void UHeroGameplayAbility_TargetLock::SwitchTarget(const FGameplayTag& SwitchDirectionTag)
+{
+	GetAvailableActorsToLock();
+
+	TArray<AActor*> ActorsOnLeft;
+	TArray<AActor*> ActorsOnRight;
+	AActor* NewLockActor = nullptr;
+
+	GetAvailableActorsAroundTaget(ActorsOnLeft,ActorsOnRight);
+
+	if (SwitchDirectionTag == WarriorGameplayTags::Player_Event_SwitchTarget_Left)
+	{
+		NewLockActor = GetClosestActorToLock(ActorsOnLeft);
+	}
+	else if (SwitchDirectionTag == WarriorGameplayTags::Player_Event_SwitchTarget_Right)
+	{
+		NewLockActor = GetClosestActorToLock(ActorsOnRight);
+	}
+
+	if (NewLockActor)
+	{
+		CurrentLockActor = NewLockActor;
+		SetTargetLockWidgetPosition();
 	}
 }
 
@@ -85,6 +116,7 @@ void UHeroGameplayAbility_TargetLock::TryLockOnTarget()
 
 void UHeroGameplayAbility_TargetLock::GetAvailableActorsToLock()
 {
+	AvailableActorsToLock.Empty();
 	TArray<FHitResult> BoxTraceHits;
 	UKismetSystemLibrary::BoxTraceMultiForObjects(
 		GetHeroCharacter(),
@@ -112,10 +144,45 @@ void UHeroGameplayAbility_TargetLock::GetAvailableActorsToLock()
 	}
 }
 
+void UHeroGameplayAbility_TargetLock::GetAvailableActorsAroundTaget(TArray<AActor*>& OutActorsOnLeft,
+	TArray<AActor*>& OutActorsOnRight)
+{
+	if (AvailableActorsToLock.IsEmpty() || !CurrentLockActor)
+	{
+		CancelTargetLockAbility();
+		return;
+	}
+	FVector PlayerLocation = GetHeroCharacter()->GetActorLocation();
+	FVector PlayerToCurrentLocation = (CurrentLockActor->GetActorLocation() - PlayerLocation).GetSafeNormal();
+
+	for (AActor* Actor : AvailableActorsToLock)
+	{
+		if (Actor != CurrentLockActor)
+		{
+			FVector PlayerToAvailableNormal = (Actor->GetActorLocation() - PlayerLocation).GetSafeNormal();
+			FVector CrossRes = FVector::CrossProduct(PlayerToCurrentLocation, PlayerToAvailableNormal);
+			if (CrossRes.Z > 0.f)
+			{
+				OutActorsOnRight.AddUnique(Actor);
+			}
+			else
+			{
+				OutActorsOnLeft.AddUnique(Actor);
+			}
+		}
+	}
+}
+
 AActor* UHeroGameplayAbility_TargetLock::GetClosestActorToLock()
 {
 	float Dis = 0.f;
 	return  UGameplayStatics::FindNearestActor(GetHeroCharacter()->GetActorLocation(),AvailableActorsToLock,Dis);
+}
+
+AActor* UHeroGameplayAbility_TargetLock::GetClosestActorToLock(TArray<AActor*> ActorsToCheck)
+{
+	float Dis = 0.f;
+	return  UGameplayStatics::FindNearestActor(GetHeroCharacter()->GetActorLocation(),ActorsToCheck,Dis);
 }
 
 void UHeroGameplayAbility_TargetLock::DrawTargetWidget()
@@ -178,6 +245,8 @@ void UHeroGameplayAbility_TargetLock::CleanUp()
 	}
 	WidgetSize = FVector2D::ZeroVector;
 
+	GetHeroCharacter()->GetCharacterMovement()->MaxWalkSpeed = CachedDefaultMaxWalkSpeed;
+	
 	CachedDefaultMaxWalkSpeed = 0.f;
 }
 
@@ -187,6 +256,14 @@ void UHeroGameplayAbility_TargetLock::InitTargetLockMovement()
 	GetHeroCharacter()->GetCharacterMovement()->MaxWalkSpeed = TargetLockMaxWalkSpeed;
 }
 
+void UHeroGameplayAbility_TargetLock::InitTargetLockMappingContext()
+{
+	ULocalPlayer* LocalPlayer = GetHeroController()->GetLocalPlayer();
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer);
+
+	Subsystem->AddMappingContext(TargetLockInputMappingContext, 0);
+}
+
 void UHeroGameplayAbility_TargetLock::ResetTargetMovement()
 {
 	if (CachedDefaultMaxWalkSpeed > 0.f)
@@ -194,4 +271,13 @@ void UHeroGameplayAbility_TargetLock::ResetTargetMovement()
 		GetHeroCharacter()->GetCharacterMovement()->MaxWalkSpeed = CachedDefaultMaxWalkSpeed;
 	}
 
+}
+
+void UHeroGameplayAbility_TargetLock::ResetTargetMappingContext()
+{
+	if(!GetHeroController())return;
+	ULocalPlayer* LocalPlayer = GetHeroController()->GetLocalPlayer();
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer);
+
+	Subsystem->RemoveMappingContext(TargetLockInputMappingContext);
 }

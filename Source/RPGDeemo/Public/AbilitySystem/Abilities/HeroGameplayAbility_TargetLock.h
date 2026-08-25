@@ -22,18 +22,26 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void OnTargetLockTick(float DeltaTime);
+
+	UFUNCTION(BlueprintCallable)
+	void SwitchTarget(const FGameplayTag& SwitchDirectionTag);
 private:
 	void TryLockOnTarget();
 	void GetAvailableActorsToLock();
 
+	void GetAvailableActorsAroundTaget(TArray<AActor*>& OutActorsOnLeft,TArray<AActor*>& OutActorsOnRight);
 	AActor* GetClosestActorToLock();
+	AActor* GetClosestActorToLock(TArray<AActor*> ActorsToCheck);
 	void DrawTargetWidget();
 	void SetTargetLockWidgetPosition();
 	void InitTargetLockMovement();
+	void InitTargetLockMappingContext();
+	
 
 	void CancelTargetLockAbility();
 	void CleanUp();
 	void ResetTargetMovement();
+	void ResetTargetMappingContext();
 
 	UPROPERTY(EditDefaultsOnly,category="TargetLock")
 	float TraceDistance = 5000.f;
@@ -55,6 +63,12 @@ private:
 
 	UPROPERTY(EditDefaultsOnly,category="TargetLock")
 	float TargetLockMaxWalkSpeed = 150.f;
+
+	UPROPERTY(EditDefaultsOnly,category="TargetLock")
+	UInputMappingContext* TargetLockInputMappingContext;
+
+	UPROPERTY(EditDefaultsOnly,category="TargetLock")
+	float TargetLockCameraDis = 20.f;
 	
 	UPROPERTY()
 	TArray<AActor*> AvailableActorsToLock;

@@ -81,7 +81,7 @@ bool UWarriorFunctionLibrary::IsTargetPawnHostile(APawn* QueryPawn, APawn* Targe
 
 	if (QueryTeamAgent && TargetTeamAgent)
 	{
-		return  QueryTeamAgent->GetGenericTeamId() != TargetTeamAgent->GetGenericTeamId();
+		return  QueryTeamAgent->GetGenericTeamId() == TargetTeamAgent->GetGenericTeamId();
 	}
 	return false;
 }
@@ -135,4 +135,15 @@ bool UWarriorFunctionLibrary::IsValidBlock(AActor* InAttacker, AActor* InDefende
 
 	
 	return DotRes < 0.1f;
+}
+
+bool UWarriorFunctionLibrary::ApplyGameplayEffectSpecHandleToTargetActor(AActor* InInstigator, AActor* InTargetActor,
+	const FGameplayEffectSpecHandle InSpecHandle)
+{
+	UWarriorAbilitySystemComponent* InstigatorASC = NativeGetWarriorASCFromActor(InInstigator);
+	UWarriorAbilitySystemComponent* TargetASC = NativeGetWarriorASCFromActor(InTargetActor);
+
+	FActiveGameplayEffectHandle ActiveGameplayEffectHandle = InstigatorASC->ApplyGameplayEffectSpecToTarget(*InSpecHandle.Data, TargetASC);
+
+	return ActiveGameplayEffectHandle.WasSuccessfullyApplied();
 }

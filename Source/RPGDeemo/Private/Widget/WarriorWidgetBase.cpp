@@ -55,7 +55,6 @@ bool UWarriorWidgetBase::TryBindOwningPawnUI()
 {
 	APlayerController* PC = GetOwningPlayer();
 	APawn* OwningPawn = PC ? PC->GetPawn() : nullptr;
-
 	if (OwningPawn)
 	{
 		if (IPawnUIInterface* PawnUIInterface = Cast<IPawnUIInterface>(OwningPawn))
@@ -69,7 +68,9 @@ bool UWarriorWidgetBase::TryBindOwningPawnUI()
 				HeroUIComponent->BroadcastCurrentRageState();
 				return true;
 			}
+			
 		}
+		
 	}
 	return false;
 }

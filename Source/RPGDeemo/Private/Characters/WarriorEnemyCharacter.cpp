@@ -51,9 +51,34 @@ UEnemyUIComponent* AWarriorEnemyCharacter::GetEnemyUIComponent() const
 void AWarriorEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// WidgetComponent 的 widget 可能晚于 BeginPlay 创建，延迟到下一帧再尝试绑定
+	GetWorldTimerManager().SetTimerForNextTick(this, &AWarriorEnemyCharacter::TryBindEnemyHealthWidget);
+}
+
+void AWarriorEnemyCharacter::TryBindEnemyHealthWidget()
+{
 	if (UWarriorWidgetBase* HealthWidget = Cast<UWarriorWidgetBase>(EnemyHealthWidgetComponent->GetUserWidgetObject()))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("[HUD] 敌人血条绑定成功: %s"), *GetName());
 		HealthWidget->InitEnemyWidget(this);
+	}
+	else if (HealthWidgetBindRetryCount < 10)
+	{
+		// widget 还没创建，延迟重试（最多 10 次，间隔 0.2 秒）
+		HealthWidgetBindRetryCount++;
+		FTimerHandle RetryTimer;
+		GetWorldTimerManager().SetTimer(
+			RetryTimer,
+			this,
+			&AWarriorEnemyCharacter::TryBindEnemyHealthWidget,
+			0.2f,
+			false
+		);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[HUD] 敌人血条绑定重试超时: %s"), *GetName());
 	}
 }
 

@@ -9,6 +9,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 
 #include "WarriorDebugHelper.h"
+#include "WarriorFunctionLibrary.h"
 #include "Widget/WarriorWidgetBase.h"
 
 AWarriorEnemyCharacter::AWarriorEnemyCharacter()
@@ -27,6 +28,16 @@ AWarriorEnemyCharacter::AWarriorEnemyCharacter()
 
 	EnemyCombatComponent = CreateDefaultSubobject<UEnemyCombatComponent>(TEXT("EnemyCombatComponent"));
 
+	LeftHandCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("LeftHandCollisionBox"));
+	LeftHandCollisionBox->SetupAttachment(GetMesh());
+	LeftHandCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	LeftHandCollisionBox->OnComponentBeginOverlap.AddUniqueDynamic(this, &AWarriorEnemyCharacter::OnBodyCollisionBoxBeginOverlap);
+
+	RightHandCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("RightHandCollisionBox"));
+	RightHandCollisionBox->SetupAttachment(GetMesh());
+	RightHandCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	RightHandCollisionBox->OnComponentBeginOverlap.AddUniqueDynamic(this, &AWarriorEnemyCharacter::OnBodyCollisionBoxBeginOverlap);
+	
 	EnemyUIComponent = CreateDefaultSubobject<UEnemyUIComponent>(TEXT("EnemyUIComponent"));
 
 	EnemyHealthWidgetComponent = CreateDefaultSubobject<UWidgetComponent>("EnemyHealthWidgetComponent");
@@ -52,7 +63,6 @@ void AWarriorEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// WidgetComponent 的 widget 可能晚于 BeginPlay 创建，延迟到下一帧再尝试绑定
 	GetWorldTimerManager().SetTimerForNextTick(this, &AWarriorEnemyCharacter::TryBindEnemyHealthWidget);
 }
 
@@ -65,7 +75,6 @@ void AWarriorEnemyCharacter::TryBindEnemyHealthWidget()
 	}
 	else if (HealthWidgetBindRetryCount < 10)
 	{
-		// widget 还没创建，延迟重试（最多 10 次，间隔 0.2 秒）
 		HealthWidgetBindRetryCount++;
 		FTimerHandle RetryTimer;
 		GetWorldTimerManager().SetTimer(
@@ -87,6 +96,35 @@ void AWarriorEnemyCharacter::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 
 	InitEnemyStartUpData();
+}
+
+#if WITH_EDITOR
+void AWarriorEnemyCharacter::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, LeftHandCollisionAttachBoneName))
+	{
+		LeftHandCollisionBox->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, LeftHandCollisionAttachBoneName);
+	}
+	else if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, RightHandCollisionAttachBoneName))
+	{
+		RightHandCollisionBox->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, RightHandCollisionAttachBoneName);
+	}
+}
+#endif
+
+void AWarriorEnemyCharacter::OnBodyCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent,
+                                                            AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                                            const FHitResult& SweepResult)
+{
+	if (APawn* HitPawn = Cast<APawn>(OtherActor))
+	{
+		if (!UWarriorFunctionLibrary::IsTargetPawnHostile(this, HitPawn))
+		{
+			EnemyCombatComponent->OnHitTargetActor(HitPawn);
+		}
+	}
 }
 
 void AWarriorEnemyCharacter::InitEnemyStartUpData()

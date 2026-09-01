@@ -7,6 +7,7 @@
 #include "WarriorDebugHelper.h"
 #include "WarriorFunctionLibrary.h"
 #include "WarriorGameplayTags.h"
+#include "Characters/WarriorEnemyCharacter.h"
 
 void UEnemyCombatComponent::OnHitTargetActor(AActor* HitActor)
 {
@@ -49,5 +50,30 @@ void UEnemyCombatComponent::OnHitTargetActor(AActor* HitActor)
 				EventData
 				);
 		}
+	}
+}
+
+void UEnemyCombatComponent::ToggleBodyCollisionBoxCollision(bool bShouldEnable, EToggleDamageType ToggleDamageType)
+{
+	Super::ToggleBodyCollisionBoxCollision(bShouldEnable, ToggleDamageType);
+
+
+	AWarriorEnemyCharacter* OwningEnemyCharacter = GetOwningPawn<AWarriorEnemyCharacter>();
+
+	UBoxComponent* LeftHandClo = OwningEnemyCharacter->GetLeftHandCollisionBox();
+	UBoxComponent* RightHandClo = OwningEnemyCharacter->GetRightHandCollisionBox();
+
+	if (ToggleDamageType == EToggleDamageType::LeftHand)
+	{
+		LeftHandClo->SetCollisionEnabled(bShouldEnable ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
+	}
+	else if (ToggleDamageType == EToggleDamageType::RightHand)
+	{
+		RightHandClo->SetCollisionEnabled(bShouldEnable ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
+	}
+
+	if (bShouldEnable == false)
+	{
+		OverlapActors.Empty();
 	}
 }

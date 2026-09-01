@@ -50,9 +50,12 @@ namespace WarriorGameplayTags
 	/** Enemy **/
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Ability_Melee);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Ability_Ranged);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Ability_SummonEnemies);
 	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Weapon);
-
+	
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Event_SummonEnemies);
+	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Status_Strafing);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Status_UnderAttack);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Status_UnBlockable);

@@ -8,7 +8,7 @@ public class RPGDeemo : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayTags", "GameplayTasks", "GameplayAbilities", "UMG", "AIModule", "AnimGraphRuntime", "MotionWarping", "Niagara" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayTags", "GameplayTasks", "GameplayAbilities", "UMG", "AIModule", "AnimGraphRuntime", "MotionWarping", "Niagara", "NavigationSystem" });
 
 		// 仅在非 Shipping 构建中启用 GameplayDebugger
 		if (Target.Configuration != UnrealTargetConfiguration.Shipping)

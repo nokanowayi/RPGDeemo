@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Component/PawnExtensionComponentBase.h"
+#include "Items/Weapons/WarriorWeaponBase.h"
 #include "PawnCombatComponent.generated.h"
 
 UENUM()
@@ -40,6 +41,8 @@ public:
 	virtual void OnHitTargetActor(AActor* HitActor);
 	virtual void OnWeaponPullFromTargetActor(AActor* InteractedActor);
 protected:
+	virtual void ToggleCurrentEquippedWeaponCollision(bool bShouldEnable);
+	virtual void ToggleBodyCollisionBoxCollision(bool bShouldEnable,EToggleDamageType ToggleDamageType);
 	TArray<AActor*> OverlapActors;
 private:
 	TMap<FGameplayTag,AWarriorWeaponBase*> CharacterCarriedWeaponsMap;

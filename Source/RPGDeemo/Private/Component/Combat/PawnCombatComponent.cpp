@@ -48,23 +48,12 @@ void UPawnCombatComponent::ToggleWeaponColiision(bool bShouldEnable, EToggleDama
 {
 	if (ToggleDamageType == EToggleDamageType::CurrentEquippedWeapon)
 	{
-		AWarriorWeaponBase* weapon = GetCharacterCurrentEquippedWeapon();
-		if (!weapon)
-		{
-			// 未装备武器时安全跳过（例如：攻击动画已触发但武器尚未生成/注册）
-			return;
-		}
-		if (bShouldEnable)
-		{
-			weapon->GetWeaponCollisionBox()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		}
-		else
-		{
-			weapon->GetWeaponCollisionBox()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			OverlapActors.Empty();
-		}
+		ToggleCurrentEquippedWeaponCollision(bShouldEnable);
 	}
-	//todo:handle body collision boxes
+	else
+	{
+		ToggleBodyCollisionBoxCollision(bShouldEnable, ToggleDamageType);
+	}
 }
 
 void UPawnCombatComponent::OnHitTargetActor(AActor* HitActor)
@@ -75,3 +64,26 @@ void UPawnCombatComponent::OnWeaponPullFromTargetActor(AActor* InteractedActor)
 {
 }
 
+void UPawnCombatComponent::ToggleCurrentEquippedWeaponCollision(bool bShouldEnable)
+{
+	AWarriorWeaponBase* weapon = GetCharacterCurrentEquippedWeapon();
+	if (!weapon)
+	{
+		// 未装备武器时安全跳过（例如：攻击动画已触发但武器尚未生成/注册）
+		return;
+	}
+	if (bShouldEnable)
+	{
+		weapon->GetWeaponCollisionBox()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	else
+	{
+		weapon->GetWeaponCollisionBox()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		OverlapActors.Empty();
+	}
+}
+
+void UPawnCombatComponent::ToggleBodyCollisionBoxCollision(bool bShouldEnable, EToggleDamageType ToggleDamageType)
+{
+	
+}

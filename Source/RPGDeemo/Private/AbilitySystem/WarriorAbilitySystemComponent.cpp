@@ -52,16 +52,9 @@ void UWarriorAbilitySystemComponent::OnAbilityInputPressed(FGameplayTag& InputTa
 	{
 		if (!AbilitySpec.GetDynamicSpecSourceTags().HasTagExact(InputTag)) continue;
 
-		if (InputTag.MatchesTag(WarriorGameplayTags::InputTag_Toggleable))
+		if (InputTag.MatchesTag(WarriorGameplayTags::InputTag_Toggleable) && AbilitySpec.IsActive())
 		{
-			if (AbilitySpec.IsActive())
-			{
-				CancelAbilityHandle(AbilitySpec.Handle);
-			}
-			else
-			{
-				TryActivateAbility(AbilitySpec.Handle);
-			}
+			CancelAbilityHandle(AbilitySpec.Handle);
 		}
 		else
 		{
@@ -85,7 +78,7 @@ void UWarriorAbilitySystemComponent::OnAbilityInputReleased(FGameplayTag& InputT
 	}
 }
 
-void UWarriorAbilitySystemComponent::GrantHeroWeaponAbilities(const TArray<FWarriorHeroAbilitySet>& WeaponAbilities,
+void UWarriorAbilitySystemComponent::GrantHeroWeaponAbilities(const TArray<FWarriorHeroAbilitySet>& WeaponAbilities,const TArray<FWarriorHeroSpecialAbilitySet>& InSpecialWeaponAbilities,
 	int32 ApplyLevel,TArray<FGameplayAbilitySpecHandle>& OutGrantedAbilitySpeHandles)
 {
 	if (WeaponAbilities.IsEmpty())
@@ -93,6 +86,16 @@ void UWarriorAbilitySystemComponent::GrantHeroWeaponAbilities(const TArray<FWarr
 		return;
 	}
 	for (const FWarriorHeroAbilitySet& HeroAbilitySet : WeaponAbilities)
+	{
+		if (!HeroAbilitySet.IsValid()) continue;
+		FGameplayAbilitySpec AbilitySpec(HeroAbilitySet.AbilityToGrant, ApplyLevel);
+		AbilitySpec.SourceObject = GetAvatarActor();
+		AbilitySpec.Level = ApplyLevel;
+		AbilitySpec.GetDynamicSpecSourceTags().AddTag(HeroAbilitySet.InputTag);
+		
+		OutGrantedAbilitySpeHandles.AddUnique(GiveAbility(AbilitySpec));
+	}
+	for (const FWarriorHeroSpecialAbilitySet& HeroAbilitySet : InSpecialWeaponAbilities)
 	{
 		if (!HeroAbilitySet.IsValid()) continue;
 		FGameplayAbilitySpec AbilitySpec(HeroAbilitySet.AbilityToGrant, ApplyLevel);

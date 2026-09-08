@@ -75,10 +75,6 @@ void AWarriorProjectileBase::OnProjectileHit(UPrimitiveComponent* HitComponent, 
 			// 调试：打印命中者、发射者、双方队伍 ID（-1 = 无队伍接口）
 			const IGenericTeamAgentInterface* InstigatorTeam = GetInstigator() ? Cast<const IGenericTeamAgentInterface>(GetInstigator()->GetController()) : nullptr;
 			const IGenericTeamAgentInterface* TargetTeam = Cast<const IGenericTeamAgentInterface>(HitPawn->GetController());
-			Debug::Print(FString::Printf(TEXT("Hostile Hit -> %s | Instigator=%s (Team %d) vs Target (Team %d)"),
-				*HitPawn->GetName(), *GetNameSafe(GetInstigator()),
-				InstigatorTeam ? (int32)InstigatorTeam->GetGenericTeamId().GetId() : -1,
-				TargetTeam ? (int32)TargetTeam->GetGenericTeamId().GetId() : -1), FColor::Red, 5.f);
 		}
 		Destroy();
 		return;
@@ -118,9 +114,25 @@ void AWarriorProjectileBase::OnProjectileBeginOverlap(UPrimitiveComponent* Overl
 		return;
 	}
 
-	Debug::Print(FString::Printf(TEXT("Projectile OVERLAP -> %s"), *GetNameSafe(OtherActor)), FColor::Yellow, 3.f);
+	if (OverlappedActors.Contains(OtherActor))
+	{
+		return;
+	}
 
-	// TODO: 在这里接伤害逻辑
+	OverlappedActors.AddUnique(OtherActor);
+
+	if(APawn* HitPawn = Cast<APawn>(OtherActor))
+	{
+		if (!UWarriorFunctionLibrary::IsTargetPawnHostile(GetInstigator(), HitPawn))
+		{
+			FGameplayEventData Data;
+			Data.Instigator = GetInstigator();
+			Data.Target = HitPawn;
+
+			HandleApplyProjectileDamage(HitPawn,Data);
+		}
+	}
+	
 }
 
 void AWarriorProjectileBase::HandleApplyProjectileDamage(APawn* InHitPawn,const FGameplayEventData& Data)

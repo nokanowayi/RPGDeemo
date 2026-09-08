@@ -16,6 +16,7 @@ namespace WarriorGameplayTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_SwitchTarget);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_SpecialWeaponAbility_Light);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_SpecialWeaponAbility_Heavy);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Interact);
 	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_MustBeHeld);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_MustBeHeld_Block);
@@ -35,6 +36,8 @@ namespace WarriorGameplayTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Ability_Rage);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Ability_SpecialWeaponAbility_Light);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Ability_SpecialWeaponAbility_Heavy);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Ability_Interact);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Ability_Contact_Stones);
 
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_CoolDown_SpecialWeaponAbility_Light);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_CoolDown_SpecialWeaponAbility_Heavy);
@@ -49,6 +52,7 @@ namespace WarriorGameplayTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Event_SwitchTarget_Right);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Event_ActivateRage);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Event_AOE);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Event_ConsumeStone);
 	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Status_JumpToFinisher);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Status_Rolling);
@@ -67,6 +71,7 @@ namespace WarriorGameplayTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Ability_Melee);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Ability_Ranged);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Ability_SummonEnemies);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Ability_SpawnStone);
 	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Weapon);
 	

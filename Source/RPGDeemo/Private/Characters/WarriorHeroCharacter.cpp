@@ -100,6 +100,7 @@ void AWarriorHeroCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 	WarriorInputComponent->BindNativeInputAction(InputConfig, WarriorGameplayTags::InputTag_Look, ETriggerEvent::Triggered,this, &AWarriorHeroCharacter::Input_Look);
 	WarriorInputComponent->BindNativeInputAction(InputConfig, WarriorGameplayTags::InputTag_SwitchTarget, ETriggerEvent::Triggered,this, &AWarriorHeroCharacter::Input_SwitchTargetTriggered);
 	WarriorInputComponent->BindNativeInputAction(InputConfig, WarriorGameplayTags::InputTag_SwitchTarget, ETriggerEvent::Completed,this, &AWarriorHeroCharacter::Input_SwitchTargetCompleted);
+	WarriorInputComponent->BindNativeInputAction(InputConfig, WarriorGameplayTags::InputTag_Interact, ETriggerEvent::Started,this, &AWarriorHeroCharacter::Input_InteractStarted);
 	
 	WarriorInputComponent->BindAbilityInputAction(InputConfig, this, &AWarriorHeroCharacter::Input_AbilityInputPressed, &AWarriorHeroCharacter::Input_AbilityInputReleased);
 }
@@ -149,6 +150,16 @@ void AWarriorHeroCharacter::Input_SwitchTargetCompleted(const FInputActionValue&
 {
 	FGameplayEventData Data;
 	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this,  SwitchDirection.X > 0.1f?WarriorGameplayTags::Player_Event_SwitchTarget_Right:WarriorGameplayTags::Player_Event_SwitchTarget_Left, Data);
+}
+
+void AWarriorHeroCharacter::Input_InteractStarted(const FInputActionValue& InputActionValue)
+{
+	FGameplayEventData Data;
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this,
+		WarriorGameplayTags::Player_Event_ConsumeStone,
+		 Data);
+
+	//todo:改成交互而不是单独的石头
 }
 
 void AWarriorHeroCharacter::Input_AbilityInputPressed(FGameplayTag InInputTag)

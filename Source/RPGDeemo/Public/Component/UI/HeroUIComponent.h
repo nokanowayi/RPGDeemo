@@ -10,6 +10,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEquippedWeaponChangedDelegate,TSoftObjectPtr<UTexture2D>,NewWeaponIconTexture);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAbilityIconSlotUpdatedDelegate,FGameplayTag,AbilityInputTag,TSoftObjectPtr<UMaterialInterface>,SoftAbilityIconMaterial);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnAbilityCooldownBeginDelegate,FGameplayTag,AbilityInputTag,float,TotalCooldownTime,float,RemainingCooldownTime);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIntercatDelegate,bool,bShouldDisplayInputKey);
 
 /**
  * 
@@ -30,7 +31,9 @@ public:
 	
 	UPROPERTY(BlueprintCallable,BlueprintAssignable)
 	FOnAbilityCooldownBeginDelegate OnAbilityCooldownBegin;
-	
+
+	UPROPERTY(BlueprintCallable,BlueprintAssignable)
+	FOnIntercatDelegate OnInteract;
 	/** 广播当前怒气百分比（Widget 绑定完成后调用） */
 	UFUNCTION(BlueprintCallable, Category = "Warrior|UI")
 	void BroadcastCurrentRageState();

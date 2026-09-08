@@ -53,7 +53,8 @@ private:
 	void Input_Look(const FInputActionValue& InputActionValue);
 	void Input_SwitchTargetTriggered(const FInputActionValue& InputActionValue);
 	void Input_SwitchTargetCompleted(const FInputActionValue& InputActionValue);
-
+	void Input_InteractStarted(const FInputActionValue& InputActionValue);
+	UPROPERTY()
 	FVector2D SwitchDirection = FVector2D::ZeroVector;
 	
 	void Input_AbilityInputPressed(FGameplayTag InInputTag);

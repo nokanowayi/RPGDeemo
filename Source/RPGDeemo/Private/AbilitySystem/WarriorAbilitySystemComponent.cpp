@@ -2,6 +2,7 @@
 
 #include "AbilitySystem/WarriorAbilitySystemComponent.h"
 #include "AbilitySystem//Abilities/WarriorHeroGameplayAbility.h"
+#include "AbilitySystem/Abilities/WarriorGameplayAbility.h"
 #include "Animation/AnimInstance.h"
 #include "GameplayAbilities/Public/Abilities/GameplayAbilityTypes.h"
 
@@ -129,8 +130,50 @@ bool UWarriorAbilitySystemComponent::TryActivateAbilityByTag(FGameplayTag Abilit
 {
 	check(AbilityTagToActivate.IsValid());
 
+	// ===== 诊断日志：定位 SpawnStone 不触发的断点 =====
+	const bool bAuthority = GetOwnerActor() && GetOwnerActor()->HasAuthority();
+	UE_LOG(LogTemp, Warning, TEXT("[TryActivateByTag] >>> tag=%s authority=%d owner=%s"),
+		*AbilityTagToActivate.ToString(), bAuthority ? 1 : 0,
+		GetOwnerActor() ? *GetOwnerActor()->GetName() : TEXT("NULL"));
+
+	// 打印当前 ASC 上所有仍被授予的能力（排查：没授予 / 被 OnGiven 的 ClearAbility 移除 / Ability Tags 配错）
+	for (const FGameplayAbilitySpec& Spec : GetActivatableAbilities())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("  [Granted] %s active=%d tags=[%s]"),
+			Spec.Ability ? *Spec.Ability->GetName() : TEXT("NULL"),
+			Spec.IsActive() ? 1 : 0,
+			Spec.Ability ? *Spec.Ability->AbilityTags.ToStringSimple() : TEXT(""));
+	}
+
+	// ===== 诊断日志2：定位 tag 命中但 GetActivatableGameplayAbilitySpecsByAllMatchingTags 仍 matched=0 的原因 =====
+	// 该函数内部还会调用 DoesAbilitySatisfyTagRequirements（检查 Blocked/Required Tag 条件），这里手动复算并打印细节
+	UE_LOG(LogTemp, Warning, TEXT("  [OwnedTags] %s"), *GetOwnedGameplayTags().ToStringSimple());
+	for (const FGameplayAbilitySpec& Spec : GetActivatableAbilities())
+	{
+		if (!Spec.Ability) continue;
+		if (!Spec.Ability->AbilityTags.HasAll(AbilityTagToActivate.GetSingleTagContainer())) continue;
+
+		const bool bSatisfy = Spec.Ability->DoesAbilitySatisfyTagRequirements(*this);
+		UE_LOG(LogTemp, Warning, TEXT("  [TagMatch] %s satisfy=%d"),
+			*Spec.Ability->GetName(), bSatisfy ? 1 : 0);
+		if (UWarriorGameplayAbility* WarriorAbility = Cast<UWarriorGameplayAbility>(Spec.Ability))
+		{
+			WarriorAbility->DebugPrintActivationTagRequirements();
+		}
+		UE_LOG(LogTemp, Warning, TEXT("      AreAbilityTagsBlocked=%d"),
+			AreAbilityTagsBlocked(Spec.Ability->AbilityTags) ? 1 : 0);
+	}
+
 	TArray<FGameplayAbilitySpec*> AbilitySpecs;
 	GetActivatableGameplayAbilitySpecsByAllMatchingTags(AbilityTagToActivate.GetSingleTagContainer(),AbilitySpecs);
+
+	UE_LOG(LogTemp, Warning, TEXT("[TryActivateByTag] matched=%d"), AbilitySpecs.Num());
+	for (FGameplayAbilitySpec* Spec : AbilitySpecs)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("  [Matched] %s active=%d"),
+			Spec && Spec->Ability ? *Spec->Ability->GetName() : TEXT("NULL"),
+			Spec ? (Spec->IsActive() ? 1 : 0) : -1);
+	}
 
 	if (AbilitySpecs.Num() != 0)
 	{
@@ -140,7 +183,11 @@ bool UWarriorAbilitySystemComponent::TryActivateAbilityByTag(FGameplayTag Abilit
 		check(SpecToActivate);
 		if (!SpecToActivate->IsActive())
 		{
-			return TryActivateAbility(SpecToActivate->Handle);
+			const bool bActivated = TryActivateAbility(SpecToActivate->Handle);
+			UE_LOG(LogTemp, Warning, TEXT("[TryActivateByTag] TryActivateAbility(%s) => %s"),
+				SpecToActivate->Ability ? *SpecToActivate->Ability->GetName() : TEXT("NULL"),
+				bActivated ? TEXT("TRUE") : TEXT("FALSE"));
+			return bActivated;
 		}
 
 

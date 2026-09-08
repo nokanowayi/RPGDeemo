@@ -48,6 +48,22 @@ UPawnCombatComponent* UWarriorGameplayAbility::GetPawnCombatComponent() const
 	return GetAvatarActorFromActorInfo()->FindComponentByClass<UPawnCombatComponent>();
 }
 
+void UWarriorGameplayAbility::DebugPrintActivationTagRequirements() const
+{
+	UE_LOG(LogTemp, Warning, TEXT("  [GA:%s] ActivationBlockedTags=[%s] ActivationRequiredTags=[%s]"),
+		*GetName(),
+		*ActivationBlockedTags.ToStringSimple(),
+		*ActivationRequiredTags.ToStringSimple());
+	UE_LOG(LogTemp, Warning, TEXT("  [GA:%s] SourceBlockedTags=[%s] SourceRequiredTags=[%s]"),
+		*GetName(),
+		*SourceBlockedTags.ToStringSimple(),
+		*SourceRequiredTags.ToStringSimple());
+	UE_LOG(LogTemp, Warning, TEXT("  [GA:%s] TargetBlockedTags=[%s] TargetRequiredTags=[%s]"),
+		*GetName(),
+		*TargetBlockedTags.ToStringSimple(),
+		*TargetRequiredTags.ToStringSimple());
+}
+
 UWarriorAbilitySystemComponent* UWarriorGameplayAbility::GetWarriorAbilitySystemComponent() const
 {
 	return Cast<UWarriorAbilitySystemComponent>(CurrentActorInfo->AbilitySystemComponent);

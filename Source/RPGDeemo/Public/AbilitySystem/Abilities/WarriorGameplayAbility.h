@@ -40,6 +40,9 @@ public:
 		return AbilityActivationPolicy == EWarriorAbilityActivationPolicy::OnGiven;
 	}
 
+	/** 调试辅助：打印该能力激活的 Tag 条件（Blocked/Required），用于诊断"按 Tag 激活失败" */
+	void DebugPrintActivationTagRequirements() const;
+
 protected:
 
 	UFUNCTION(BlueprintPure,Category="Warrior|Ability")

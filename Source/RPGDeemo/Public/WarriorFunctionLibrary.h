@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystem/WarriorAbilitySystemComponent.h"
+#include "GameInstance/WarriorGameInstance.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "WarriorTypes/WarriorEnumTypes.h"
 #include "WarriorFunctionLibrary.generated.h"
@@ -55,4 +56,10 @@ public:
 	UFUNCTION(Blueprintcallable, Category = "Warrior|FunctionLibrary",meta = (Latent,WorldContext = "WorldContextObject",LatentInfo = "LatentInfo",ExpandEnumAsExecs = "CountDownInput|CountDownOutput",TotalTime = "1.0",UpdateInterval = "0.1"))
 	static void CountDown(const UObject* WorldContextObject, float TotalTime,float UpdateInterval, float& OutRemainingTime,
 		UPARAM(DisplayName = "OutPut") EWarriorCountDownActionInput CountDownInput,EWarriorCountDownActionOutput& CountDownOutput,FLatentActionInfo LatentInfo);
+
+	UFUNCTION(BlueprintPure, Category = "Warrior|FunctionLibrary",meta = (WorldContext = "WorldContextObject"))
+	static UWarriorGameInstance* GetGameInstance(const UObject* WorldContextObject);
+
+	UFUNCTION(Blueprintcallable, Category = "Warrior|FunctionLibrary",meta = (WorldContext = "WorldContextObject"))
+	static void ToogleInputMode(EWarriorInputMode InputMode,const UObject* WorldContextObject);
 };

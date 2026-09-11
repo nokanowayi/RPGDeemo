@@ -9,6 +9,7 @@
 #include "WarriorDebugHelper.h"
 #include "WarriorGameplayTags.h"
 #include "Interfaces/PawnCombatInterface.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "WarriorTypes/WarriorCountDownAction.h"
 
@@ -178,4 +179,51 @@ void UWarriorFunctionLibrary::CountDown(const UObject* WorldContextObject, float
 	}
 
 	
+}
+
+UWarriorGameInstance* UWarriorFunctionLibrary::GetGameInstance(const UObject* WorldContextObject)
+{
+	if (GEngine)
+	{
+		if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject,EGetWorldErrorMode::LogAndReturnNull))
+		{
+			return Cast<UWarriorGameInstance>(World->GetGameInstance());
+		}
+		
+	}
+
+	return nullptr;
+}
+
+void UWarriorFunctionLibrary::ToogleInputMode(EWarriorInputMode InputMode, const UObject* WorldContextObject)
+{
+	APlayerController* PlayerController = nullptr;
+	if (GEngine)
+	{
+		if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject,EGetWorldErrorMode::LogAndReturnNull))
+		{
+			PlayerController = World->GetFirstPlayerController();
+		}
+		
+	}
+
+	if (!PlayerController)
+	{
+		return;
+	}
+
+	FInputModeGameOnly InputModeGameOnly;
+	FInputModeUIOnly InputModeUIOnly;
+
+	switch (InputMode)
+	{
+		case EWarriorInputMode::GameOnly:
+			PlayerController->SetInputMode(InputModeGameOnly);
+			PlayerController->bShowMouseCursor = false;
+			break;
+		case EWarriorInputMode::UIOnly:
+			PlayerController->SetInputMode(InputModeUIOnly);
+			PlayerController->bShowMouseCursor = true;
+			break;
+	}
 }

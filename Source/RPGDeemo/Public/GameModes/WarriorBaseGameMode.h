@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "WarriorTypes/WarriorEnumTypes.h"
 #include "WarriorBaseGameMode.generated.h"
 
 /**
@@ -25,4 +26,11 @@ public:
 	/** 查找并加入局域网会话（Client） */
 	UFUNCTION(BlueprintCallable, Category = "Warrior|Multiplayer")
 	void JoinLANMatch();
+
+protected:
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category = "GameSettings")
+	EWarriorGameDifficulty CurrentGameDifficulty;
+
+public:
+	FORCEINLINE EWarriorGameDifficulty GetCurrentGameDifficulty() const { return CurrentGameDifficulty; }
 };

@@ -7,7 +7,7 @@
 #include "Component/Combat/EnemyCombatComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-
+#include "GameModes/WarriorBaseGameMode.h"
 #include "WarriorDebugHelper.h"
 #include "WarriorFunctionLibrary.h"
 #include "Widget/WarriorWidgetBase.h"
@@ -70,7 +70,6 @@ void AWarriorEnemyCharacter::TryBindEnemyHealthWidget()
 {
 	if (UWarriorWidgetBase* HealthWidget = Cast<UWarriorWidgetBase>(EnemyHealthWidgetComponent->GetUserWidgetObject()))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[HUD] 敌人血条绑定成功: %s"), *GetName());
 		HealthWidget->InitEnemyWidget(this);
 	}
 	else if (HealthWidgetBindRetryCount < 10)
@@ -84,10 +83,6 @@ void AWarriorEnemyCharacter::TryBindEnemyHealthWidget()
 			0.2f,
 			false
 		);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("[HUD] 敌人血条绑定重试超时: %s"), *GetName());
 	}
 }
 
@@ -134,12 +129,36 @@ void AWarriorEnemyCharacter::InitEnemyStartUpData()
 		return;
 	}
 
+	int32 ApplyLevel = 1;
+
+	if (AWarriorBaseGameMode* BaseGameMode = GetWorld()->GetAuthGameMode<AWarriorBaseGameMode>())
+	{
+		switch (BaseGameMode->GetCurrentGameDifficulty())
+		{
+		case EWarriorGameDifficulty::Easy:
+			ApplyLevel = 1;
+			break;
+		case EWarriorGameDifficulty::Normal:
+			ApplyLevel = 2;
+			break;
+		case EWarriorGameDifficulty::Hard:
+			ApplyLevel = 3;
+			break;
+		case EWarriorGameDifficulty::VeryHard:
+			ApplyLevel = 4;
+			break;
+		default:
+			break;
+		}
+	}
+	
 	UAssetManager::GetStreamableManager().RequestAsyncLoad(CharacterStartUpData.ToSoftObjectPath(),FStreamableDelegate::CreateLambda(
-		[this]()
+		// ApplyLevel 是局部变量，必须按值捕获（否则编译报 C3493，异步回调里也拿不到它）
+		[this, ApplyLevel]()
 		{
 			if (UDataAsset_StartUpDataBase* LoadedData = CharacterStartUpData.Get())
 			{
-				LoadedData->GiveToAbilitySystemComponent(WarriorAbilitySystemComponent);
+				LoadedData->GiveToAbilitySystemComponent(WarriorAbilitySystemComponent,ApplyLevel);
 			}
 		}));
 }

@@ -6,6 +6,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameModes/WarriorBaseGameMode.h"
 #include "Net/UnrealNetwork.h"
 #include "WarriorDebugHelper.h"
 #include "WarriorGameplayTags.h"
@@ -72,7 +73,26 @@ void AWarriorHeroCharacter::PossessedBy(AController* NewController)
 	{
 		if(UDataAsset_StartUpDataBase* LoadData = CharacterStartUpData.LoadSynchronous())
 		{
-			LoadData->GiveToAbilitySystemComponent(GetWarriorAbilitySystemComponent(), 1);
+			int32 ApplyLevel = 1;
+
+			if (AWarriorBaseGameMode* BaseGameMode = GetWorld()->GetAuthGameMode<AWarriorBaseGameMode>())
+			{
+				switch (BaseGameMode->GetCurrentGameDifficulty())
+				{
+				case EWarriorGameDifficulty::Easy:
+					ApplyLevel = 4;
+					break;
+				case EWarriorGameDifficulty::Normal:
+					ApplyLevel = 3;
+				case EWarriorGameDifficulty::Hard:
+					ApplyLevel = 2;
+				case EWarriorGameDifficulty::VeryHard:
+					ApplyLevel = 1;
+				default:
+					break;
+				}
+			}
+			LoadData->GiveToAbilitySystemComponent(GetWarriorAbilitySystemComponent(), ApplyLevel);
 		}
 	}
 }

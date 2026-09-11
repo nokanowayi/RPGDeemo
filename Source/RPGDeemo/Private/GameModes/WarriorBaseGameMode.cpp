@@ -1,7 +1,7 @@
 // MyRPGDemo
 
 
-#include "WarriorBaseGameMode.h"
+#include "GameModes/WarriorBaseGameMode.h"
 #include "Controllers/WarriorHeroController.h"
 
 #include "OnlineSubsystem.h"
@@ -10,6 +10,8 @@
 
 AWarriorBaseGameMode::AWarriorBaseGameMode()
 {
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = true;
 	PlayerControllerClass = AWarriorHeroController::StaticClass();
 
 	// 多人：每个玩家默认生成间隔（避免重叠）

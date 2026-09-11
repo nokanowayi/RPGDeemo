@@ -116,7 +116,6 @@ void UWarriorAbilitySystemComponent::RemoveGrantedHeroWeaponAbilities(
 	if (GetOwnerActor() && !GetOwnerActor()->HasAuthority()) return;
 	for (const FGameplayAbilitySpecHandle& SpecHandle : InSpeHandlesToRemove)
 	{
-		Debug::Print(FString::Printf(TEXT("RemoveGrantedHeroWeaponAbilities: %s"), *SpecHandle.ToString()));
 		if (SpecHandle.IsValid())
 		{
 			ClearAbility(SpecHandle);

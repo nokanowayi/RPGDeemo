@@ -61,7 +61,6 @@ bool UWarriorWidgetBase::TryBindOwningPawnUI()
 		{
 			if (UHeroUIComponent* HeroUIComponent = PawnUIInterface->GetHeroUIComponent())
 			{
-				UE_LOG(LogTemp, Warning, TEXT("[HUD] 绑定成功: %s"), *HeroUIComponent->GetName());
 				BP_OnOwningHeroUIComponentInitialized(HeroUIComponent);
 				
 				HeroUIComponent->BroadcastCurrentHealthState();

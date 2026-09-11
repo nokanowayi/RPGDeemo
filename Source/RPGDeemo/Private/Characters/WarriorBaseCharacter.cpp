@@ -88,6 +88,13 @@ void AWarriorBaseCharacter::InitializeAbilitySystemForClient()
 
 	WarriorAbilitySystemComponent->InitAbilityActorInfo(this, this);
 
+	// 客户端也必须把 AttributeSet 挂到 ASC：
+	// 否则 showdebug abilitysystem 看不到属性集、GetAttributeSet 返回 null、属性复制(OnRep)也收不到
+	if (WarriorAttributeSet)
+	{
+		WarriorAbilitySystemComponent->AddAttributeSetSubobject(WarriorAttributeSet);
+	}
+
 	// 客户端 ASC 初始化后，激活 OnGiven 策略的能力（如 HUD 创建）
 	// 服务器在 GiveAbility 时已通过 OnGiveAbility 激活，客户端需要手动补激活
 	// 能力列表可能尚未复制完成，延迟几帧重试

@@ -54,7 +54,6 @@ void AWarriorWeaponBase::OnWeaponOverlapBegin(UPrimitiveComponent* OverlappedCom
 
 		if (WeaponInstigator && !UWarriorFunctionLibrary::IsTargetPawnHostile(WeaponInstigator, HitPawn))
 		{
-			Debug::Print(FString::Printf(TEXT("Weapon Hit -> %s (by %s)"), *HitPawn->GetName(), *WeaponInstigator->GetName()), FColor::Green, 2.f);
 			OnWeaponHitTarget.ExecuteIfBound(OtherActor);
 		}
 	}

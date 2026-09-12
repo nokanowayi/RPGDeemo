@@ -4,7 +4,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystem/WarriorAbilitySystemComponent.h"
 #include "WarriorFunctionLibrary.h"
-
+#include "SaveGame/WarriorSaveGame.h"
 #include "GenericTeamAgentInterface.h"
 #include "WarriorDebugHelper.h"
 #include "WarriorGameplayTags.h"
@@ -226,4 +226,30 @@ void UWarriorFunctionLibrary::ToogleInputMode(EWarriorInputMode InputMode, const
 			PlayerController->bShowMouseCursor = true;
 			break;
 	}
+}
+
+void UWarriorFunctionLibrary::SaveCurrentGameDifficulty(EWarriorGameDifficulty InDifficulty)
+{
+	USaveGame* SaveGameObject =UGameplayStatics::CreateSaveGameObject(UWarriorSaveGame::StaticClass());
+	if (UWarriorSaveGame* WarriorSaveGame = Cast<UWarriorSaveGame>(SaveGameObject))
+	{
+		WarriorSaveGame->SaveCurrentGameDifficulty = InDifficulty;
+		bool IsSaved = UGameplayStatics::SaveGameToSlot(WarriorSaveGame, WarriorGameplayTags::GameData_SaveGame_Slot_1.GetTag().ToString(), 0);
+		Debug::Print(IsSaved ? TEXT("Save Success") : TEXT("Save Failed"));
+	}
+}
+
+bool UWarriorFunctionLibrary::TryLoadSaveCurrentGameDifficulty(EWarriorGameDifficulty& OutDifficulty)
+{
+	if (UGameplayStatics::DoesSaveGameExist(WarriorGameplayTags::GameData_SaveGame_Slot_1.GetTag().ToString(), 0))
+	{
+		USaveGame* SaveGameObject =UGameplayStatics::LoadGameFromSlot(WarriorGameplayTags::GameData_SaveGame_Slot_1.GetTag().ToString(), 0);
+		if (UWarriorSaveGame* WarriorSaveGame = Cast<UWarriorSaveGame>(SaveGameObject))
+		{
+			OutDifficulty = WarriorSaveGame->SaveCurrentGameDifficulty;
+			Debug::Print(TEXT("Loaded"));
+			return true;
+		}
+	}
+	return false;
 }

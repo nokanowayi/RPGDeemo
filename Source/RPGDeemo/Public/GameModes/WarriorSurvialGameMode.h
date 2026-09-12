@@ -68,6 +68,8 @@ private:
 	FWarriorEnemyWaveSpawnerTableRow GetCurrentWaveSpawnerTableRow() const;
 	bool ShouldSpawnEnemies() const;
 
+	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
+
 	UFUNCTION()
 	void OnEnemyDestroy(AActor* DestroyedActor);
 	UPROPERTY()

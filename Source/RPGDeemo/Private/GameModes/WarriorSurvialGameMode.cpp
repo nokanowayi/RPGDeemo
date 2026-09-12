@@ -5,6 +5,7 @@
 
 #include "NavigationSystem.h"
 #include "WarriorDebugHelper.h"
+#include "WarriorFunctionLibrary.h"
 #include "Characters/WarriorEnemyCharacter.h"
 #include "Engine/AssetManager.h"
 #include "Engine/TargetPoint.h"
@@ -182,6 +183,18 @@ FWarriorEnemyWaveSpawnerTableRow AWarriorSurvialGameMode::GetCurrentWaveSpawnerT
 bool AWarriorSurvialGameMode::ShouldSpawnEnemies() const
 {
 	return TotalSpawnThisWaveCounter < GetCurrentWaveSpawnerTableRow().TotalEnemyToSpawnThisWave;
+}
+
+void AWarriorSurvialGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
+{
+	Super::InitGame(MapName, Options, ErrorMessage);
+	EWarriorGameDifficulty CurrentDifficulty;
+	if (UWarriorFunctionLibrary::TryLoadSaveCurrentGameDifficulty(CurrentDifficulty))
+	{
+		CurrentGameDifficulty = CurrentDifficulty;
+	}
+
+	
 }
 
 void AWarriorSurvialGameMode::OnEnemyDestroy(AActor* DestroyedActor)

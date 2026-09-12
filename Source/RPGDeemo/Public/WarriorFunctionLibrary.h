@@ -62,4 +62,10 @@ public:
 
 	UFUNCTION(Blueprintcallable, Category = "Warrior|FunctionLibrary",meta = (WorldContext = "WorldContextObject"))
 	static void ToogleInputMode(EWarriorInputMode InputMode,const UObject* WorldContextObject);
+
+	UFUNCTION(Blueprintcallable, Category = "Warrior|FunctionLibrary")
+	static void SaveCurrentGameDifficulty(EWarriorGameDifficulty InDifficulty);
+	
+	UFUNCTION(Blueprintcallable, Category = "Warrior|FunctionLibrary")
+	static bool TryLoadSaveCurrentGameDifficulty(EWarriorGameDifficulty& OutDifficulty);
 };

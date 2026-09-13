@@ -46,6 +46,8 @@ AWarriorHeroCharacter::AWarriorHeroCharacter()
 	HeroCombatComponent = CreateDefaultSubobject<UHeroCombatComponent>(TEXT("HeroCombatComponent"));
 
 	HeroUIComponent = CreateDefaultSubobject<UHeroUIComponent>(TEXT("HeroUIComponent"));
+
+	WarriorLevelComponent = CreateDefaultSubobject<UWarriorLevelComponent>(TEXT("WarriorLevelComponent"));
 	
 }
 
@@ -62,6 +64,11 @@ UPawnUIComponent* AWarriorHeroCharacter::GetPawnUIComponent() const
 UHeroUIComponent* AWarriorHeroCharacter::GetHeroUIComponent() const
 {
 	return HeroUIComponent;
+}
+
+UWarriorLevelComponent* AWarriorHeroCharacter::GetWarriorLevelComponent() const
+{
+	return WarriorLevelComponent;
 }
 
 void AWarriorHeroCharacter::PossessedBy(AController* NewController)

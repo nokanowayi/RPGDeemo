@@ -65,6 +65,8 @@ bool UWarriorWidgetBase::TryBindOwningPawnUI()
 				
 				HeroUIComponent->BroadcastCurrentHealthState();
 				HeroUIComponent->BroadcastCurrentRageState();
+				HeroUIComponent->BroadcastCurrentExpState();
+				HeroUIComponent->BroadcastCurrentLevelState();
 				return true;
 			}
 			

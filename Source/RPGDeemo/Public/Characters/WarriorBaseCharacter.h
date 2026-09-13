@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
+#include "Component/WarriorLevelComponent.h"
 #include "DataAssets/StartUpData/DataAsset_StartUpDataBase.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/PawnCombatInterface.h"
@@ -28,6 +29,8 @@ public:
 	virtual  UPawnCombatComponent* GetPawnCombatComponent() const override;
 
 	virtual UPawnUIComponent* GetPawnUIComponent() const override;
+	virtual  UWarriorLevelComponent* GetWarriorLevelComponent() const;
+
 protected:
 	virtual void PossessedBy(AController* NewController) override;
 
@@ -58,7 +61,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AbilitySystem")
 	UWarriorAttributeSet* WarriorAttributeSet;
-
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "CharacterData")
 	TSoftObjectPtr<UDataAsset_StartUpDataBase> CharacterStartUpData;
 

@@ -20,6 +20,8 @@ AWarriorBaseCharacter::AWarriorBaseCharacter()
 	WarriorAbilitySystemComponent = CreateDefaultSubobject<UWarriorAbilitySystemComponent>(TEXT("WarriorAbilitySystemComponent"));
 	WarriorAttributeSet  = CreateDefaultSubobject<UWarriorAttributeSet>(TEXT("WarriorAttributeSet"));
 	MotionWarpingComponent = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("MotionWarpingComponent"));
+
+	
 }
 
 UAbilitySystemComponent* AWarriorBaseCharacter::GetAbilitySystemComponent() const
@@ -33,6 +35,11 @@ UPawnCombatComponent* AWarriorBaseCharacter::GetPawnCombatComponent() const
 }
 
 UPawnUIComponent* AWarriorBaseCharacter::GetPawnUIComponent() const
+{
+	return nullptr;
+}
+
+UWarriorLevelComponent* AWarriorBaseCharacter::GetWarriorLevelComponent() const
 {
 	return nullptr;
 }

@@ -7,6 +7,7 @@
 #include "WarriorDebugHelper.h"
 #include "WarriorFunctionLibrary.h"
 #include "WarriorGameplayTags.h"
+#include "Characters/WarriorHeroCharacter.h"
 #include "Interfaces/PawnUIInterface.h"
 
 UWarriorAttributeSet::UWarriorAttributeSet()
@@ -17,6 +18,8 @@ UWarriorAttributeSet::UWarriorAttributeSet()
 	InitMaxRage(1.f);
 	InitAttackPower(1.F);
 	InitDefensePower(1.f);
+	InitCharacterLevel(1.f);
+	InitCurrentExp(0.f);
 }
 
 void UWarriorAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -27,6 +30,8 @@ void UWarriorAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	DOREPLIFETIME_CONDITION_NOTIFY(UWarriorAttributeSet, MaxHealth, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UWarriorAttributeSet, CurrentRage, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UWarriorAttributeSet, MaxRage, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UWarriorAttributeSet, CharacterLevel, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UWarriorAttributeSet, CurrentExp, COND_None, REPNOTIFY_Always);
 }
 
 void UWarriorAttributeSet::OnRep_CurrentHealth(const FGameplayAttributeData& OldCurrentHealth)
@@ -51,6 +56,19 @@ void UWarriorAttributeSet::OnRep_MaxRage(const FGameplayAttributeData& OldMaxRag
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UWarriorAttributeSet, MaxRage, OldMaxRage);
 	BroadcastRageChanged();
+}
+
+void UWarriorAttributeSet::OnRep_CharacterLevel(const FGameplayAttributeData& OldCharacterLevel)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UWarriorAttributeSet, CharacterLevel, OldCharacterLevel);
+	Debug::Print(TEXT("BroadcastLevelChanged: LevelUpDelegate.Broadcast"), FColor::Green, 5.f);
+	BroadcastLevelChanged();
+}
+
+void UWarriorAttributeSet::OnRep_CurrentExp(const FGameplayAttributeData& OldCurrentExp)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UWarriorAttributeSet, CurrentExp, OldCurrentExp);
+	BroadcastExpChanged();
 }
 
 void UWarriorAttributeSet::BroadcastHealthChanged() const
@@ -90,6 +108,48 @@ void UWarriorAttributeSet::BroadcastRageChanged() const
 		}
 	}
 }
+
+void UWarriorAttributeSet::BroadcastExpChanged() const
+{
+	AActor* AvatarActor = GetOwningActor();
+	if (!AvatarActor)
+	{
+		return;
+	}
+
+	IPawnUIInterface* PawnUIInterface = CachedPawnUIInterface.IsValid() ?
+		CachedPawnUIInterface.Get() : Cast<IPawnUIInterface>(AvatarActor);
+
+	if (PawnUIInterface)
+	{
+		if (UHeroUIComponent* HeroUIComponent = PawnUIInterface->GetHeroUIComponent())
+		{
+			HeroUIComponent->OnExpChanged.Broadcast(GetCurrentRage() / GetMaxRage());
+		}
+	}
+}
+
+void UWarriorAttributeSet::BroadcastLevelChanged() const
+{
+	AActor* AvatarActor = GetOwningActor();
+	if (!AvatarActor)
+	{
+		return;
+	}
+
+	IPawnUIInterface* PawnUIInterface = CachedPawnUIInterface.IsValid() ?
+		CachedPawnUIInterface.Get() : Cast<IPawnUIInterface>(AvatarActor);
+
+	if (PawnUIInterface)
+	{
+		if (UHeroUIComponent* HeroUIComponent = PawnUIInterface->GetHeroUIComponent())
+		{
+			HeroUIComponent->OnLevelUpDelegate.Broadcast(static_cast<int32>(GetCharacterLevel()));
+			
+		}
+	}
+}
+
 
 void UWarriorAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data)
 {
@@ -182,6 +242,12 @@ void UWarriorAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffec
 			Debug::Print(TEXT("Dead"),  FColor::Green, 2.f);
 			UWarriorFunctionLibrary::AddGameplayTagToActorIfNone(Data.Target.GetAvatarActor(), WarriorGameplayTags::Shared_Status_Dead);
 		}
+	}
+
+	if (Data.EvaluatedData.Attribute == GetCurrentExpAttribute())
+	{
+		UWarriorLevelComponent* LevelComponent = Cast<AWarriorHeroCharacter>(GetOwningActor())->GetWarriorLevelComponent();
+		LevelComponent->SettleExp();
 	}
 	
 }

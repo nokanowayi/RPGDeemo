@@ -43,6 +43,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI",meta = (AllowPrivateAccess = "true"))
 	UHeroUIComponent* HeroUIComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level",meta = (AllowPrivateAccess = "true"))
+	UWarriorLevelComponent* WarriorLevelComponent;
 #pragma endregion
 
 #pragma region Input
@@ -66,5 +69,6 @@ public:
 	FORCEINLINE UHeroCombatComponent* GetHeroCombatComponent() const { return HeroCombatComponent; }
 	virtual UPawnUIComponent* GetPawnUIComponent() const override;
 	virtual UHeroUIComponent* GetHeroUIComponent() const override;
+	virtual UWarriorLevelComponent* GetWarriorLevelComponent() const override;
 };
 

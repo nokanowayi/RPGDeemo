@@ -7,6 +7,7 @@
 #include "GameInstance/WarriorGameInstance.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "WarriorTypes/WarriorEnumTypes.h"
+#include "Widget/Widget_ActivatableBase.h"
 #include "WarriorFunctionLibrary.generated.h"
 
 class UPawnCombatComponent;
@@ -68,4 +69,7 @@ public:
 	
 	UFUNCTION(Blueprintcallable, Category = "Warrior|FunctionLibrary")
 	static bool TryLoadSaveCurrentGameDifficulty(EWarriorGameDifficulty& OutDifficulty);
+	
+	UFUNCTION(BlueprintPure, Category = "Warrior|FunctionLibrary")
+	static TSoftClassPtr<UWidget_ActivatableBase> GetFrontendWidgetClassByTag(UPARAM (meta = (Categories = "UI.Widget"))FGameplayTag InTag);
 };

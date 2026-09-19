@@ -11,6 +11,7 @@
 #include "Interfaces/PawnCombatInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Settings/FrontendDeveloperSettings.h"
 #include "WarriorTypes/WarriorCountDownAction.h"
 
 UWarriorAbilitySystemComponent* UWarriorFunctionLibrary::NativeGetWarriorASCFromActor(AActor* InActor)
@@ -252,4 +253,11 @@ bool UWarriorFunctionLibrary::TryLoadSaveCurrentGameDifficulty(EWarriorGameDiffi
 		}
 	}
 	return false;
+}
+
+TSoftClassPtr<UWidget_ActivatableBase> UWarriorFunctionLibrary::GetFrontendWidgetClassByTag(UPARAM (meta = (Categories = "UI.Widget"))FGameplayTag InTag)
+{
+	const UFrontendDeveloperSettings* Settings = GetDefault<UFrontendDeveloperSettings>();
+
+	return  Settings->FrontendWidgetMap.FindRef(InTag);
 }

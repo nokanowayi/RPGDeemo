@@ -19,7 +19,7 @@ public:
 	FGameplayTag InputTag;
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
-	UInputAction* InputAction;
+	UInputAction* InputAction = nullptr;   // USTRUCT 里的对象指针必须显式初始化，否则 UHT 报 "not initialized properly"
 
 	bool IsValid() const
 	{

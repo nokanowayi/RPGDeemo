@@ -76,6 +76,16 @@ namespace WarriorGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Enemy_Status_Strafing,"Enemy.Status.Strafing");
 	UE_DEFINE_GAMEPLAY_TAG(Enemy_Status_UnderAttack,"Enemy.Status.UnderAttack");
 	UE_DEFINE_GAMEPLAY_TAG(Enemy_Status_UnBlockable,"Enemy.Status.UnBlockable");
+
+	/** UI **/
+	UE_DEFINE_GAMEPLAY_TAG(UI_WidgetStack_Modal,"UI.WidgetStack.Modal");
+	UE_DEFINE_GAMEPLAY_TAG(UI_WidgetStack_GameMenu,"UI.WidgetStack.GameMenu");
+	UE_DEFINE_GAMEPLAY_TAG(UI_WidgetStack_GameHud,"UI.WidgetStack.GameHud");
+	UE_DEFINE_GAMEPLAY_TAG(UI_WidgetStack_Frontend,"UI.WidgetStack.Frontend");
+
+	UE_DEFINE_GAMEPLAY_TAG(UI_Widget_PressAnyKeyScreen,"UI.Widget.PressAnyKeyScreen");
+	UE_DEFINE_GAMEPLAY_TAG(UI_Widget_MainMenuScreen,"UI.Widget.MainMenuScreen");
+	
 	/** Shared Tags **/
 	UE_DEFINE_GAMEPLAY_TAG(Shared_Ability_HitReact,"Shared.Ability.HitReact");
 	UE_DEFINE_GAMEPLAY_TAG(Shared_Ability_Death,"Shared.Ability.Death");

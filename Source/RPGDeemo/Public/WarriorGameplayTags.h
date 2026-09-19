@@ -81,6 +81,15 @@ namespace WarriorGameplayTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Status_UnderAttack);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Status_UnBlockable);
 
+	/** UI **/
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(UI_WidgetStack_Modal);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(UI_WidgetStack_GameMenu);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(UI_WidgetStack_GameHud);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(UI_WidgetStack_Frontend);
+
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(UI_Widget_PressAnyKeyScreen);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(UI_Widget_MainMenuScreen);
+
 	/** Shared Tags **/
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Shared_Ability_HitReact);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Shared_Ability_Death);

@@ -89,6 +89,8 @@ namespace WarriorGameplayTags
 
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(UI_Widget_PressAnyKeyScreen);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(UI_Widget_MainMenuScreen);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(UI_Widget_ConfirmScreen);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(UI_Widget_OptionsScreen);
 
 	/** Shared Tags **/
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Shared_Ability_HitReact);

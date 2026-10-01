@@ -39,3 +39,21 @@ enum class EWarriorInputMode : uint8
 	GameOnly,
 	UIOnly
 };
+
+UENUM(BlueprintType)
+enum class EConfirmScreenType : uint8
+{
+	OK,
+	YesNo,
+	OKCancel,
+	Unknown UMETA(Hidden)
+};
+
+UENUM(BlueprintType)
+enum class EConfirmScreenButtonType : uint8
+{
+	Confirmed,
+	Cancelled,
+	Closed,
+	Unknown UMETA(Hidden)
+};

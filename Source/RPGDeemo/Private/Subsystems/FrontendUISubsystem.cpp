@@ -9,6 +9,8 @@
 #include "Widgets/CommonActivatableWidgetContainer.h"
 #include "Widget/Widget_PrimaryLayout.h"
 #include "WarriorDebugHelper.h"
+#include "WarriorFunctionLibrary.h"
+#include "Widget/Widget_ConfirmScreen.h"
 
 UFrontendUISubsystem* UFrontendUISubsystem::Get(const UObject* WorldContextObject)
 {
@@ -99,4 +101,40 @@ void UFrontendUISubsystem::PushSoftWidgetToStackAsync(const FGameplayTag& InStac
 
 			AsyncPushStateCallBack(EAsyncPushWidgetState::AfterPush, CreatedWidget);
 		}));
+}
+
+void UFrontendUISubsystem::PushConfirmScreenToModalStackAsync(EConfirmScreenType InConfirmScreenType,
+	const FText& InScreenTitle, const FText& InScreenMessage,
+	TFunction<void(EConfirmScreenButtonType)> ButtonClickedCallback)
+{
+	UConfirmScreenInfoObject* ConfirmScreenInfoObject = nullptr;
+	switch (InConfirmScreenType)
+	{
+	case EConfirmScreenType::OK:
+		ConfirmScreenInfoObject = UConfirmScreenInfoObject::CreateOKScreen(InScreenTitle, InScreenMessage);
+		break;
+	case EConfirmScreenType::YesNo:
+		ConfirmScreenInfoObject = UConfirmScreenInfoObject::CreateYesNoScreen(InScreenTitle, InScreenMessage);
+		break;
+	case EConfirmScreenType::OKCancel:
+		ConfirmScreenInfoObject = UConfirmScreenInfoObject::CreateOKCancelScreen(InScreenTitle, InScreenMessage);
+		break;
+	case EConfirmScreenType::Unknown:
+		break;
+	default: ;
+	}
+	check(ConfirmScreenInfoObject);
+
+	PushSoftWidgetToStackAsync(WarriorGameplayTags::UI_WidgetStack_Modal,
+		UWarriorFunctionLibrary::GetFrontendWidgetClassByTag(WarriorGameplayTags::UI_Widget_ConfirmScreen),
+		[ConfirmScreenInfoObject,ButtonClickedCallback](EAsyncPushWidgetState InPushState, UWidget_ActivatableBase* InCreatedWidget)
+		{
+			if (InPushState == EAsyncPushWidgetState::OnCreatedBeforePush)
+			{
+				if (UWidget_ConfirmScreen* ConfirmScreen = Cast<UWidget_ConfirmScreen>(InCreatedWidget))
+				{
+					ConfirmScreen->InitConfirmScreen(ConfirmScreenInfoObject, ButtonClickedCallback);
+				}
+			}
+		});
 }

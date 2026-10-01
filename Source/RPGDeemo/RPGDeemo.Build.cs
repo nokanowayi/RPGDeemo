@@ -16,7 +16,9 @@ public class RPGDeemo : ModuleRules
 			"GameplayAbilities", "UMG", 
 			"AIModule", "AnimGraphRuntime", 
 			"MotionWarping", "Niagara", 
-			"NavigationSystem","MoviePlayer" });
+			"NavigationSystem","MoviePlayer", "CommonUI",
+			"CommonInput"
+		});
 
 		// 仅在非 Shipping 构建中启用 GameplayDebugger
 		if (Target.Configuration != UnrealTargetConfiguration.Shipping)

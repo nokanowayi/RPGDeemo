@@ -85,6 +85,8 @@ namespace WarriorGameplayTags
 
 	UE_DEFINE_GAMEPLAY_TAG(UI_Widget_PressAnyKeyScreen,"UI.Widget.PressAnyKeyScreen");
 	UE_DEFINE_GAMEPLAY_TAG(UI_Widget_MainMenuScreen,"UI.Widget.MainMenuScreen");
+	UE_DEFINE_GAMEPLAY_TAG(UI_Widget_ConfirmScreen,"UI.Widget.ConfirmScreen");
+	UE_DEFINE_GAMEPLAY_TAG(UI_Widget_OptionsScreen,"UI.Widget.OptionsScreen");
 	
 	/** Shared Tags **/
 	UE_DEFINE_GAMEPLAY_TAG(Shared_Ability_HitReact,"Shared.Ability.HitReact");
@@ -103,9 +105,12 @@ namespace WarriorGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Shared_Status_HitReact_Right,"Shared.Status.HitReact.Right");
 	UE_DEFINE_GAMEPLAY_TAG(Shared_Status_Invincible,"Shared.Status.Invincible");
 
+	
 	/** Game Data Tag**/
 	UE_DEFINE_GAMEPLAY_TAG(GameData_Level_SurvivalGameModeMap,"GameData.Level.SurvivalGameModeMap");
 	UE_DEFINE_GAMEPLAY_TAG(GameData_Level_MainMenuMap,"GameData.Level.MainMenuMap");
 
 	UE_DEFINE_GAMEPLAY_TAG(GameData_SaveGame_Slot_1,"GameData.SaveGame.Slot.1");
 }
+
+	UE_DEFINE_GAMEPLAY_TAG(UI_Widget_ConfirmScreen,"UI.Widget.ConfirmScreen");

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "OptionsDataRegistry.h"
 #include "Widget/Widget_ActivatableBase.h"
+#include "Widget/Components/FrontendCommonListView.h"
 #include "Widget/Components/FrontendTabListWidgetBase.h"
 #include "Widget_OptionsScreen.generated.h"
 
@@ -34,6 +35,8 @@ private:
 	UFUNCTION()
 	void OnOptionsTabSelected(FName TabId);
 
+	UPROPERTY(meta=(BindWidget))
+	UFrontendCommonListView* CommonListView_OptionsList;
 	UPROPERTY(transient)
 	UOptionsDataRegistry* OwningDataRegistry;
 	

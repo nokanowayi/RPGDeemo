@@ -9,7 +9,20 @@
 #include "Characters/WarriorEnemyCharacter.h"
 #include "Engine/AssetManager.h"
 #include "Engine/TargetPoint.h"
+#include "GameStates/WarriorSurvialGameState.h"
 #include "Kismet/GameplayStatics.h"
+
+AWarriorSurvialGameMode::AWarriorSurvialGameMode()
+{
+	// 生存模式要展示给客户端的状态与委托都放在 GameState 上。
+	// GameMode 只存在于服务器 —— 原来 UI 直接建在 BP_SurvivalGamemode 里，所以客户端永远看不到。
+	GameStateClass = AWarriorSurvialGameState::StaticClass();
+}
+
+AWarriorSurvialGameState* AWarriorSurvialGameMode::GetSurvialGameState() const
+{
+	return GetGameState<AWarriorSurvialGameState>();
+}
 
 void AWarriorSurvialGameMode::BeginPlay()
 {
@@ -24,6 +37,15 @@ void AWarriorSurvialGameMode::BeginPlay()
 	}
 
 	TotalWaveToSpawn = EnemyWaveSpawnerDataTable->GetRowNames().Num();
+
+	// 同步给 GameState：客户端 UI 要显示"第几波 / 共几波"和倒计时时长，
+	// 而这些配置在 GameMode 上（客户端读不到），所以一并复制过去。
+	if (AWarriorSurvialGameState* SurvialGameState = GetSurvialGameState())
+	{
+		SurvialGameState->SetWaveTimings(SpawnWaitTime, SpawnEnemyDelayTime, WaveCompletedWaitTime);
+		SurvialGameState->SetWaveInfo(CurrentWaveCount, TotalWaveToSpawn);
+	}
+
 	PreLoadNextWaveEnemies();
 }
 
@@ -68,6 +90,12 @@ void AWarriorSurvialGameMode::Tick(float DeltaSeconds)
 
 			CurrentWaveCount++;
 
+			// 同步波次信息给 GameState（客户端 UI 读的是 GameState）
+			if (AWarriorSurvialGameState* SurvialGameState = GetSurvialGameState())
+			{
+				SurvialGameState->SetWaveInfo(CurrentWaveCount, TotalWaveToSpawn);
+			}
+
 			if (HasFinishedAllWaves())
 			{
 				SetCurrentState(ESurvivalGameModeState::AllWaveDone);
@@ -85,7 +113,19 @@ void AWarriorSurvialGameMode::SetCurrentState(ESurvivalGameModeState NewState)
 {
 	CurrentGameModeState = NewState;
 
+	// 服务器内部广播（仅为兼容既有的 BP_SurvivalGamemode 绑定而保留）
 	OnCurrentGameStateChange.Broadcast(CurrentGameModeState);
+
+	// 同步到 GameState：客户端靠它收到状态变化并驱动 UI
+	//（放在 GameMode 上的委托客户端连对象都没有，绑不上 —— 这就是"UI 只在服务器可见"的根因）
+	if (AWarriorSurvialGameState* SurvialGameState = GetSurvialGameState())
+	{
+		// 计时配置也一起同步：BP 里会在 SpawningNewWave 分支运行时改 SpawnEnemyDelayTime，
+		// 只同步一次的话客户端会一直用旧值显示倒计时。
+		SurvialGameState->SetWaveTimings(SpawnWaitTime, SpawnEnemyDelayTime, WaveCompletedWaitTime);
+		SurvialGameState->SetWaveInfo(CurrentWaveCount, TotalWaveToSpawn);
+		SurvialGameState->SetCurrentGameModeState(NewState);
+	}
 }
 
 bool AWarriorSurvialGameMode::HasFinishedAllWaves() const

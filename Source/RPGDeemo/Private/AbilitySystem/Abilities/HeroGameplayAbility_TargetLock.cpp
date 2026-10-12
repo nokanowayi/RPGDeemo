@@ -3,6 +3,7 @@
 
 #include "AbilitySystem/Abilities/HeroGameplayAbility_TargetLock.h"
 
+#include "Characters/WarriorHeroCharacter.h"
 #include "EnhancedInputSubsystems.h"
 #include "WarriorDebugHelper.h"
 #include "WarriorFunctionLibrary.h"
@@ -19,9 +20,18 @@ void UHeroGameplayAbility_TargetLock::ActivateAbility(const FGameplayAbilitySpec
                                                       const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
                                                       const FGameplayEventData* TriggerEventData)
 {
-	TryLockOnTarget();
+	if (!TryLockOnTarget())
+	{
+		return;
+	}
+
 	InitTargetLockMovement();
-	InitTargetLockMappingContext();
+	
+	if (IsLocallyControlled())
+	{
+		InitTargetLockMappingContext();
+	}
+
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 }
 
@@ -38,10 +48,16 @@ void UHeroGameplayAbility_TargetLock::EndAbility(const FGameplayAbilitySpecHandl
 
 void UHeroGameplayAbility_TargetLock::OnTargetLockTick(float DeltaTime)
 {
-	if (!CurrentLockActor || UWarriorFunctionLibrary::NativeDoesActorHaveTag(CurrentLockActor,WarriorGameplayTags::Shared_Status_Dead)||
+	if (!IsValid(CurrentLockActor) || UWarriorFunctionLibrary::NativeDoesActorHaveTag(CurrentLockActor,WarriorGameplayTags::Shared_Status_Dead)||
 		UWarriorFunctionLibrary::NativeDoesActorHaveTag(GetHeroCharacter(),WarriorGameplayTags::Shared_Status_Dead))
 	{
 		CancelTargetLockAbility();
+		return;
+	}
+
+	// 控件位置与控制器旋转只对本地玩家有意义
+	if (!IsLocallyControlled())
+	{
 		return;
 	}
 
@@ -91,33 +107,39 @@ void UHeroGameplayAbility_TargetLock::SwitchTarget(const FGameplayTag& SwitchDir
 	}
 }
 
-void UHeroGameplayAbility_TargetLock::TryLockOnTarget()
+bool UHeroGameplayAbility_TargetLock::TryLockOnTarget()
 {
 	GetAvailableActorsToLock();
 
 	if (AvailableActorsToLock.IsEmpty())
 	{
 		CancelTargetLockAbility();
-		return;
+		return false;
 	}
 
 	CurrentLockActor = GetClosestActorToLock();
 
-	if (CurrentLockActor)
+	if (!CurrentLockActor)
+	{
+		CancelTargetLockAbility();
+		return false;
+	}
+
+	// 服务端上非本地PC没有 LocalPlayer，AddToViewport会读到空指针
+	if (IsLocallyControlled())
 	{
 		DrawTargetWidget();
 		SetTargetLockWidgetPosition();
 	}
-	else
-	{
-		CancelTargetLockAbility();
-	}
+
+	return true;
 }
 
 void UHeroGameplayAbility_TargetLock::GetAvailableActorsToLock()
 {
 	AvailableActorsToLock.Empty();
 	TArray<FHitResult> BoxTraceHits;
+	
 	UKismetSystemLibrary::BoxTraceMultiForObjects(
 		GetHeroCharacter(),
 		GetHeroCharacter()->GetActorLocation(),
@@ -136,7 +158,12 @@ void UHeroGameplayAbility_TargetLock::GetAvailableActorsToLock()
 	{
 		if (AActor* HitActor = TraceHit.GetActor())
 		{
-			if (HitActor != GetHeroCharacter())
+			if (HitActor == GetHeroCharacter() || HitActor->IsA<AWarriorHeroCharacter>())
+			{
+				continue;
+			}
+			
+			if (Cast<APawn>(HitActor))
 			{
 				AvailableActorsToLock.AddUnique(HitActor);
 			}
@@ -187,18 +214,33 @@ AActor* UHeroGameplayAbility_TargetLock::GetClosestActorToLock(TArray<AActor*> A
 
 void UHeroGameplayAbility_TargetLock::DrawTargetWidget()
 {
-	if (!DrawTargetLockWidget)
+	if (DrawTargetLockWidget)
 	{
-		DrawTargetLockWidget = CreateWidget<UWarriorWidgetBase>(GetHeroController(),TargetLockWidgetClass);
-
-		DrawTargetLockWidget->AddToViewport();
+		return;
 	}
 
+	if (!TargetLockWidgetClass)
+	{
+		Debug::Print(TEXT("TargetLockWidgetClass 未设置，跳过锁定控件创建"));
+		return;
+	}
+
+	DrawTargetLockWidget = CreateWidget<UWarriorWidgetBase>(GetHeroController(),TargetLockWidgetClass);
+
+	if (DrawTargetLockWidget)
+	{
+		DrawTargetLockWidget->AddToViewport();
+	}
+	else
+	{
+		Debug::Print(TEXT("锁定控件创建失败（OwningPlayer 无效或控件类不可用）"));
+	}
 }
 
 void UHeroGameplayAbility_TargetLock::SetTargetLockWidgetPosition()
 {
-	if (!DrawTargetLockWidget || !CurrentLockActor)
+	// GetHeroController() 为空时 ProjectWorldLocationToWidgetPosition 会崩
+	if (!DrawTargetLockWidget || !CurrentLockActor || !GetHeroController())
 	{
 		CancelTargetLockAbility();
 		return;
@@ -211,7 +253,7 @@ void UHeroGameplayAbility_TargetLock::SetTargetLockWidgetPosition()
 		ScreenPosition,
 		true);
 
-	if (WidgetSize == FVector2D::ZeroVector)
+	if (WidgetSize == FVector2D::ZeroVector && DrawTargetLockWidget->WidgetTree)
 	{
 		DrawTargetLockWidget->WidgetTree->ForEachWidget([this](UWidget* Widget)
 	   {
@@ -229,7 +271,7 @@ void UHeroGameplayAbility_TargetLock::SetTargetLockWidgetPosition()
 
 void UHeroGameplayAbility_TargetLock::CancelTargetLockAbility()
 {
-	
+	ResetTargetMovement();
 	CancelAbility(GetCurrentAbilitySpecHandle(),GetCurrentActorInfo(),GetCurrentActivationInfo(),true);
 }
 
@@ -244,9 +286,12 @@ void UHeroGameplayAbility_TargetLock::CleanUp()
 		DrawTargetLockWidget = nullptr;
 	}
 	WidgetSize = FVector2D::ZeroVector;
-
-	GetHeroCharacter()->GetCharacterMovement()->MaxWalkSpeed = CachedDefaultMaxWalkSpeed;
 	
+	if (CachedDefaultMaxWalkSpeed > 0.f && GetHeroCharacter() && GetHeroCharacter()->GetCharacterMovement())
+	{
+		GetHeroCharacter()->GetCharacterMovement()->MaxWalkSpeed = CachedDefaultMaxWalkSpeed;
+	}
+
 	CachedDefaultMaxWalkSpeed = 0.f;
 }
 
@@ -258,8 +303,17 @@ void UHeroGameplayAbility_TargetLock::InitTargetLockMovement()
 
 void UHeroGameplayAbility_TargetLock::InitTargetLockMappingContext()
 {
+	if (!GetHeroController() || !GetHeroController()->IsLocalPlayerController())
+	{
+		return;
+	}
+
 	ULocalPlayer* LocalPlayer = GetHeroController()->GetLocalPlayer();
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer);
+	if (!Subsystem)
+	{
+		return;
+	}
 
 	Subsystem->AddMappingContext(TargetLockInputMappingContext, 0);
 }
@@ -275,9 +329,17 @@ void UHeroGameplayAbility_TargetLock::ResetTargetMovement()
 
 void UHeroGameplayAbility_TargetLock::ResetTargetMappingContext()
 {
-	if(!GetHeroController())return;
+	if (!GetHeroController() || !GetHeroController()->IsLocalPlayerController())
+	{
+		return;
+	}
+
 	ULocalPlayer* LocalPlayer = GetHeroController()->GetLocalPlayer();
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer);
+	if (!Subsystem)
+	{
+		return;
+	}
 
 	Subsystem->RemoveMappingContext(TargetLockInputMappingContext);
 }

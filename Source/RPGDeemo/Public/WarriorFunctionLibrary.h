@@ -60,6 +60,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Warrior|FunctionLibrary",meta = (WorldContext = "WorldContextObject"))
 	static UWarriorGameInstance* GetGameInstance(const UObject* WorldContextObject);
+	
+	UFUNCTION(BlueprintPure, Category = "Warrior|FunctionLibrary", meta = (WorldContext = "WorldContextObject"))
+	static class AWarriorSurvialGameState* GetSurvialGameState(const UObject* WorldContextObject);
 
 	UFUNCTION(Blueprintcallable, Category = "Warrior|FunctionLibrary",meta = (WorldContext = "WorldContextObject"))
 	static void ToogleInputMode(EWarriorInputMode InputMode,const UObject* WorldContextObject);
@@ -72,4 +75,10 @@ public:
 	
 	UFUNCTION(BlueprintPure, Category = "Warrior|FunctionLibrary")
 	static TSoftClassPtr<UWidget_ActivatableBase> GetFrontendWidgetClassByTag(UPARAM (meta = (Categories = "UI.Widget"))FGameplayTag InTag);
+	
+	UFUNCTION(BlueprintCallable, Category = "Warrior|FunctionLibrary")
+	static void StartDissolveOnActor(AActor* TargetActor, float Duration = 3.0f, FName ParameterName = TEXT("DissolveAmount"));
+	
+	UFUNCTION(BlueprintCallable, Category = "Warrior|FunctionLibrary", meta = (DefaultToSelf = "TargetActor"))
+	static void ApplyRollMovement(AActor* TargetActor, FVector WorldDirection, float Speed, float Duration);
 };

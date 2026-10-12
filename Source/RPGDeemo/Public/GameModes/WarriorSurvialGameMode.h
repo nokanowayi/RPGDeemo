@@ -6,22 +6,13 @@
 #include "Characters/WarriorEnemyCharacter.h"
 #include "GameModes/WarriorBaseGameMode.h"
 #include "Engine/DataTable.h"
+#include "GameStates/WarriorSurvialGameState.h"   // 为了 FOnSurvivalGameStateChange（GameState 转发用）
+#include "WarriorTypes/WarriorEnumTypes.h"
 #include "WarriorSurvialGameMode.generated.h"
 
 /**
  * 
  */
-
-UENUM(BlueprintType)
-enum class ESurvivalGameModeState : uint8
-{
-	WaitSpawnNewWave,
-	SpawningNewWave,
-	InProgress,
-	WaveComplete,
-	AllWaveDone,
-	PlayerDie
-};
 
 USTRUCT(BlueprintType)
 struct FWarriorEnemyWaveSpawnerInfo 
@@ -49,11 +40,13 @@ struct FWarriorEnemyWaveSpawnerTableRow:public FTableRowBase
 	int32 TotalEnemyToSpawnThisWave = 1;
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSurvivalGameStateChange, ESurvivalGameModeState, CurrentState);
 UCLASS()
 class RPGDEEMO_API AWarriorSurvialGameMode : public AWarriorBaseGameMode
 {
 	GENERATED_BODY()
+
+public:
+	AWarriorSurvialGameMode();
 
 protected:
 	virtual void BeginPlay() override;
@@ -61,6 +54,9 @@ protected:
 	
 
 private:
+	/** 当前的生存模式 GameState（GameStateClass 已在构造函数里指定），可能为空，调用处判空 */
+	class AWarriorSurvialGameState* GetSurvialGameState() const;
+
 	void SetCurrentState(ESurvivalGameModeState NewState);
 	bool HasFinishedAllWaves() const;
 	void PreLoadNextWaveEnemies();
@@ -72,10 +68,17 @@ private:
 
 	UFUNCTION()
 	void OnEnemyDestroy(AActor* DestroyedActor);
+
+	// 注意：状态字段与"给客户端看"的状态变化委托都在 AWarriorSurvialGameState 上。
+	// GameMode 只存在于服务器，放在这里的状态客户端拿不到（生存模式 UI 曾经因此只在服务器可见）。
 	UPROPERTY()
 	ESurvivalGameModeState CurrentGameModeState;
 
-	UPROPERTY(BlueprintAssignable,BlueprintCallable)
+	/**
+	 * 服务器内部的旧委托，仅为兼容已有蓝图而保留。
+	 * 客户端侧请改绑 AWarriorSurvialGameState::OnCurrentGameStateChange（GameMode 在客户端不存在）。
+	 */
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FOnSurvivalGameStateChange OnCurrentGameStateChange;
 
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="WaveDefinition",meta=(AllowPrivateAccess="true"))

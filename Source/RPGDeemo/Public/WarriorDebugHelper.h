@@ -1,4 +1,7 @@
-﻿#pragma once
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Engine/Engine.h"   // GEngine：单独编译某个 .cpp 时不能依赖别的头文件先把它带进来
 
 namespace Debug
 {

@@ -11,7 +11,16 @@
 #include "Interfaces/PawnCombatInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Components/MeshComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/RootMotionSource.h"
+#include "Engine/World.h"
+#include "TimerManager.h"
 #include "Settings/FrontendDeveloperSettings.h"
+#include "GameStates/WarriorSurvialGameState.h"
 #include "WarriorTypes/WarriorCountDownAction.h"
 
 UWarriorAbilitySystemComponent* UWarriorFunctionLibrary::NativeGetWarriorASCFromActor(AActor* InActor)
@@ -27,9 +36,6 @@ void UWarriorFunctionLibrary::AddGameplayTagToActorIfNone(AActor* InActor, FGame
 	
 	if (!ASC->HasMatchingGameplayTag(TagToAdd))
 	{
-		// AddLooseGameplayTag：更新本地 TagMap 并触发 OnTagCountChanged -> TriggerAbilityCheck（OwnedTagAdded 触发死亡能力）
-		// AddReplicatedLooseGameplayTag：仅加入复制容器（FMinimalReplicationTagCountMap），
-		//   不触发本地回调，但客户端收到复制后 UpdateOwnerTagMap 会触发回调（客户端需要本地授予能力才能响应）
 		ASC->AddLooseGameplayTag(TagToAdd);
 		ASC->AddReplicatedLooseGameplayTag(TagToAdd);
 	}
@@ -78,10 +84,14 @@ UPawnCombatComponent* UWarriorFunctionLibrary::BP_GetPawnCombatComponentFromActo
 
 bool UWarriorFunctionLibrary::IsTargetPawnHostile(APawn* QueryPawn, APawn* TargetPawn)
 {
-	check(QueryPawn && TargetPawn);
+	if (!QueryPawn || !TargetPawn)
+	{
+		return false;
+	}
+
 	IGenericTeamAgentInterface* QueryTeamAgent = Cast<IGenericTeamAgentInterface>(QueryPawn->GetController());
 	IGenericTeamAgentInterface* TargetTeamAgent = Cast<IGenericTeamAgentInterface>(TargetPawn->GetController());
-
+	
 	if (QueryTeamAgent && TargetTeamAgent)
 	{
 		return  QueryTeamAgent->GetGenericTeamId() == TargetTeamAgent->GetGenericTeamId();
@@ -196,6 +206,19 @@ UWarriorGameInstance* UWarriorFunctionLibrary::GetGameInstance(const UObject* Wo
 	return nullptr;
 }
 
+AWarriorSurvialGameState* UWarriorFunctionLibrary::GetSurvialGameState(const UObject* WorldContextObject)
+{
+	if (GEngine)
+	{
+		if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject,EGetWorldErrorMode::LogAndReturnNull))
+		{
+			return World->GetGameState<AWarriorSurvialGameState>();
+		}
+	}
+
+	return nullptr;
+}
+
 void UWarriorFunctionLibrary::ToogleInputMode(EWarriorInputMode InputMode, const UObject* WorldContextObject)
 {
 	APlayerController* PlayerController = nullptr;
@@ -260,4 +283,175 @@ TSoftClassPtr<UWidget_ActivatableBase> UWarriorFunctionLibrary::GetFrontendWidge
 	const UFrontendDeveloperSettings* Settings = GetDefault<UFrontendDeveloperSettings>();
 
 	return  Settings->FrontendWidgetMap.FindRef(InTag);
+}
+
+void UWarriorFunctionLibrary::StartDissolveOnActor(AActor* TargetActor, float Duration, FName ParameterName)
+{
+	if (!IsValid(TargetActor))
+	{
+		return;
+	}
+
+	UWorld* World = TargetActor->GetWorld();
+	if (!World)
+	{
+		return;
+	}
+	
+	TArray<TWeakObjectPtr<UMeshComponent>> Meshes;
+	{
+		TArray<UMeshComponent*> FoundMeshes;
+		TargetActor->GetComponents<UMeshComponent>(FoundMeshes);
+
+		for (UMeshComponent* Mesh : FoundMeshes)
+		{
+			if (IsValid(Mesh))
+			{
+				// 复用的材质实例上可能残留上一次的溶解进度，先重置
+				Mesh->SetScalarParameterValueOnMaterials(ParameterName, 0.f);
+				Meshes.Add(Mesh);
+			}
+		}
+	}
+	
+	for (const TWeakObjectPtr<UMeshComponent>& WeakMesh : Meshes)
+	{
+		if (UMeshComponent* Mesh = WeakMesh.Get())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[Dissolve]   Mesh=%s Slots=%d"), *Mesh->GetName(), Mesh->GetNumMaterials());
+		}
+	}
+
+	const float SafeDuration = FMath::Max(0.01f, Duration);
+	constexpr float UpdateStep = 0.02f;
+	
+	// 进度与 TimerHandle 用共享指针保存：lambda 内部可以自行结束定时器，
+	TSharedPtr<float> Elapsed = MakeShared<float>(0.f);
+	TSharedPtr<FTimerHandle> TimerHandle = MakeShared<FTimerHandle>();
+	TWeakObjectPtr<AActor> WeakActor(TargetActor);
+
+	FTimerDelegate Delegate = FTimerDelegate::CreateWeakLambda(World,
+		[WeakActor, Meshes, ParameterName, SafeDuration, Elapsed, TimerHandle, World]()
+		{
+			if (!WeakActor.IsValid())
+			{
+				World->GetTimerManager().ClearTimer(*TimerHandle);
+				return;
+			}
+
+			*Elapsed += UpdateStep;
+			const float Alpha = FMath::Clamp(*Elapsed / SafeDuration, 0.f, 1.f);
+
+			for (const TWeakObjectPtr<UMeshComponent>& WeakMesh : Meshes)
+			{
+				if (UMeshComponent* Mesh = WeakMesh.Get())
+				{
+					// SetScalarParameterValueOnMaterials 会自动为静态材质创建 MID
+					Mesh->SetScalarParameterValueOnMaterials(ParameterName, Alpha);
+				}
+			}
+
+			if (Alpha >= 1.f)
+			{
+				World->GetTimerManager().ClearTimer(*TimerHandle);
+			}
+		});
+
+	World->GetTimerManager().SetTimer(*TimerHandle, Delegate, UpdateStep, true);
+}
+
+void UWarriorFunctionLibrary::ApplyRollMovement(AActor* TargetActor, FVector WorldDirection, float Speed, float Duration)
+{
+
+	if (!TargetActor)
+	{
+		return;
+	}
+
+	ACharacter* Character = Cast<ACharacter>(TargetActor);
+	UCharacterMovementComponent* MoveComp = Character ? Character->GetCharacterMovement() : nullptr;
+	if (!MoveComp)
+	{
+		return;
+	}
+
+	UWorld* World = TargetActor->GetWorld();
+	if (!World || Duration <= KINDA_SMALL_NUMBER || Speed <= KINDA_SMALL_NUMBER)
+	{
+		return;
+	}
+
+	// 方向归一化
+	FVector Direction = WorldDirection.GetSafeNormal();
+	if (Direction.IsNearlyZero() || Direction.ContainsNaN())
+	{
+		Direction = Character->GetActorForwardVector().GetSafeNormal();
+	}
+	if (Direction.IsNearlyZero() || Direction.ContainsNaN())
+	{
+		return;
+	}
+
+	const bool bIsAuthority = TargetActor->HasAuthority();
+	const bool bIsLocallyControlled = Character->IsLocallyControlled();
+	const float TotalDistance = Speed * Duration;
+
+	// 权威端直接采用客户端上报的位置
+	if (bIsAuthority)
+	{
+		MoveComp->bIgnoreClientMovementErrorChecksAndCorrection = true;
+		MoveComp->bServerAcceptClientAuthoritativePosition = true;
+
+		TWeakObjectPtr<UCharacterMovementComponent> WeakMoveCompRef(MoveComp);
+		FTimerHandle RestoreHandle;
+		FTimerDelegate RestoreDelegate = FTimerDelegate::CreateWeakLambda(World,
+			[WeakMoveCompRef]()
+			{
+				if (UCharacterMovementComponent* MC = WeakMoveCompRef.Get())
+				{
+					MC->bIgnoreClientMovementErrorChecksAndCorrection = false;
+					MC->bServerAcceptClientAuthoritativePosition = false;
+				}
+			});
+		World->GetTimerManager().SetTimer(RestoreHandle, RestoreDelegate, Duration + 0.15f, false);
+	}
+	
+	if (!bIsLocallyControlled)
+	{
+		return;
+	}
+
+	const FVector StartLocation = TargetActor->GetActorLocation();
+	const FRotator FaceRotation(0.f, Direction.Rotation().Yaw, 0.f);
+
+	TWeakObjectPtr<AActor> WeakActor(TargetActor);
+	TSharedPtr<float> Elapsed = MakeShared<float>(0.f);
+	TSharedPtr<FTimerHandle> TimerHandle = MakeShared<FTimerHandle>();
+
+	// 每一帧独自推进位移和确定方向
+	FTimerDelegate StepDelegate = FTimerDelegate::CreateWeakLambda(World,
+		[WeakActor, Direction, FaceRotation, Speed, Duration, TotalDistance, Elapsed, TimerHandle, World, StartLocation]()
+		{
+			AActor* Actor = WeakActor.Get();
+			if (!Actor)
+			{
+				World->GetTimerManager().ClearTimer(*TimerHandle);
+				return;
+			}
+
+			const float DeltaSeconds = FMath::Max(World->GetDeltaSeconds(), 1.f / 240.f);
+			
+			Actor->SetActorRotation(FaceRotation);
+			
+			FHitResult Hit;
+			Actor->AddActorWorldOffset(Direction * Speed * DeltaSeconds, /*bSweep=*/true, &Hit);
+
+			*Elapsed += DeltaSeconds;
+			if (Hit.bBlockingHit || *Elapsed >= Duration)
+			{
+				World->GetTimerManager().ClearTimer(*TimerHandle);
+				
+			}
+		});
+	World->GetTimerManager().SetTimer(*TimerHandle, StepDelegate, 1.f / 60.f, true);
 }

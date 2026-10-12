@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "LatentActions.h"   // FPendingLatentAction / FLatentResponse 定义在这里（不在 LatentActionManager.h）
 #include "WarriorEnumTypes.h"
 
 class FWarriorCountDownAction : public FPendingLatentAction

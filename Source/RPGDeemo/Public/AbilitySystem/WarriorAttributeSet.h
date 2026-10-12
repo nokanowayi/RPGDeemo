@@ -28,8 +28,7 @@ public:
 
 	// ===== 多人复制通知（客户端收到属性变化时刷新UI） =====
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-	/** 复制通知：客户端收到新血量时调用（刷新血条） */
+	
 	UFUNCTION()
 	virtual void OnRep_CurrentHealth(const FGameplayAttributeData& OldCurrentHealth);
 

@@ -26,7 +26,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void SwitchTarget(const FGameplayTag& SwitchDirectionTag);
 private:
-	void TryLockOnTarget();
+	// 返回是否成功锁到目标：没锁到时内部已经 Cancel 掉能力，调用方必须立刻返回，
+	// 否则会继续执行 InitTargetLockMovement 等逻辑（能力已结束，没人会去恢复速度）
+	bool TryLockOnTarget();
 	void GetAvailableActorsToLock();
 
 	void GetAvailableActorsAroundTaget(TArray<AActor*>& OutActorsOnLeft,TArray<AActor*>& OutActorsOnRight);

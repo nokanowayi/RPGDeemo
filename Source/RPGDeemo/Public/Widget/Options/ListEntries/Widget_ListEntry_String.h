@@ -25,6 +25,7 @@ protected:
 	virtual void OnOwningListDataObjectModified(UListDataObject_Base* OwningModifiedData,EOptionsListDataModifyReason ModifyReason) override;
 
 private:
+	
 	void OnIncreaseButtonClicked();
 	void OnDecreaseButtonClicked();
 	

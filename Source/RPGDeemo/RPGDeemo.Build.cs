@@ -17,7 +17,8 @@ public class RPGDeemo : ModuleRules
 			"AIModule", "AnimGraphRuntime", 
 			"MotionWarping", "Niagara", 
 			"NavigationSystem","MoviePlayer", "CommonUI",
-			"CommonInput"
+			"CommonInput",
+			"PropertyPath"
 		});
 
 		// 仅在非 Shipping 构建中启用 GameplayDebugger

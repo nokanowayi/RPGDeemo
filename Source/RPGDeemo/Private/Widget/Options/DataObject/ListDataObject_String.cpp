@@ -3,6 +3,8 @@
 
 #include "Widget/Options/DataObject/ListDataObject_String.h"
 
+#include "WarriorDebugHelper.h"
+
 void UListDataObject_String::AddDynamicOption(const FString& InOptionString, const FText& InOptionText)
 {
 	AvailableOptionsStringArray.Add(InOptionString);
@@ -26,7 +28,14 @@ void UListDataObject_String::AdvanceToNextOption()
 	}
 
 	TrySetDisplayTextFromStringValue(CurrentStringValue);
-	NotifyListDataModified(this);
+
+	if (DataDynamicSetter.IsValid())
+	{
+		DataDynamicSetter->SetValueAsString(CurrentStringValue);
+
+		Debug::Print(FString::Printf(TEXT("DataSetter Used") ), 5.f, FColor::Green);
+		NotifyListDataModified(this);
+	}
 }
 
 void UListDataObject_String::BackToPreviousOption()
@@ -42,12 +51,17 @@ void UListDataObject_String::BackToPreviousOption()
 	}
 	else
 	{
+		Debug::Print(FString::Printf(TEXT("DataSetter Used")), 5.f, FColor::Green);
 		CurrentStringValue = AvailableOptionsStringArray[AvailableOptionsStringArray.Num() - 1];
 	}
 
 	TrySetDisplayTextFromStringValue(CurrentStringValue);
 
-	NotifyListDataModified(this);
+	if (DataDynamicSetter.IsValid())
+	{
+		DataDynamicSetter->SetValueAsString(CurrentStringValue);
+		NotifyListDataModified(this);
+	}
 }
 
 void UListDataObject_String::OnDataObjectInit()
@@ -57,6 +71,14 @@ void UListDataObject_String::OnDataObjectInit()
 		CurrentStringValue = AvailableOptionsStringArray[0];
 	}
 
+	if (DataDynamicGetter)
+	{
+		if (DataDynamicGetter.IsValid())
+		{
+			CurrentStringValue = DataDynamicGetter->GetValueAsString();
+		}
+
+	}
 	if (!TrySetDisplayTextFromStringValue(CurrentStringValue))
 	{
 		CurrentTextValue = FText::FromString("Invalid Value");

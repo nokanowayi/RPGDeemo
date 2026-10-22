@@ -3,6 +3,8 @@
 
 #include "Widget/Options/DataObject/ListDataObject_Base.h"
 
+#include "Settings/FrontendGameUserSettings.h"
+
 void UListDataObject_Base::InitDataObject()
 {
 	OnDataObjectInit();
@@ -17,4 +19,9 @@ void UListDataObject_Base::NotifyListDataModified(UListDataObject_Base* ModifyDa
 	EOptionsListDataModifyReason ModifyReason)
 {
 	OnListDataModified.Broadcast(ModifyData, ModifyReason);
+
+	if (bShouldApplyChangeImmediately)
+	{
+		UFrontendGameUserSettings::Get()->ApplySettings(true);
+	}
 }

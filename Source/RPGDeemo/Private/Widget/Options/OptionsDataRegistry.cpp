@@ -5,6 +5,10 @@
 #include "Widget/Options/DataObject/ListDataObject_String.h"
 #include "Widget/Options/DataObject/ListDataObject_Collection.h"
 
+class UFrontendGameUserSettings;
+#define MAKE_OPTIONS_DATA_CONTROL(SetterOrGetterFuncName) \
+	MakeShared<FOptionsDataInteractionHelper>(GET_FUNCTION_NAME_STRING_CHECKED(UFrontendGameUserSettings, SetterOrGetterFuncName))
+
 void UOptionsDataRegistry::InitUOptionsDataRegistry(ULocalPlayer* InOwningLocalPlayer)
 {
 	InitGameplayCollectionTab();
@@ -31,6 +35,9 @@ void UOptionsDataRegistry::InitGameplayCollectionTab()
 	GameplayCollectionData->SetDataID(FName(TEXT("GameplayTabCollection")));
 	GameplayCollectionData->SetDisplayName(FText::FromString(TEXT("Gameplay")));
 
+	// TSharedPtr<FOptionsDataInteractionHelper*> ConstructHelper = MakeShared<FOptionsDataInteractionHelper*>(new FOptionsDataInteractionHelper(TEXT("GetCurrentGameDifficulty")));
+	// GET_FUNCTION_NAME_CHECKED(UFrontendGameUserSettings, GetCurrentGameDifficulty);
+
 	{
 		UListDataObject_String* GameDifficulty = NewObject<UListDataObject_String>();
 		GameDifficulty->SetDataID(FName(TEXT("GameDifficulty")));
@@ -39,6 +46,9 @@ void UOptionsDataRegistry::InitGameplayCollectionTab()
 		GameDifficulty->AddDynamicOption(TEXT("Normal"), FText::FromString(TEXT("Normal")));
 		GameDifficulty->AddDynamicOption(TEXT("Hard"), FText::FromString(TEXT("Hard")));
 		GameDifficulty->AddDynamicOption(TEXT("VeryHard"), FText::FromString(TEXT("VeryHard")));
+		GameDifficulty->SetDataDynamicGetter(MAKE_OPTIONS_DATA_CONTROL(GetCurrentGameDifficulty));
+		GameDifficulty->SetDataDynamicSetter(MAKE_OPTIONS_DATA_CONTROL(SetCurrentGameDifficulty));
+		
 		GameplayCollectionData->AddChildListData(GameDifficulty);
 	}
 	RegisteredOptionsTabCollections.Add(GameplayCollectionData);

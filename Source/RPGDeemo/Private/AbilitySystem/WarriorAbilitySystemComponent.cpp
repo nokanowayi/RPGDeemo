@@ -112,7 +112,7 @@ void UWarriorAbilitySystemComponent::RemoveGrantedHeroWeaponAbilities(
 	TArray<FGameplayAbilitySpecHandle>& InSpeHandlesToRemove)
 {
 	if (InSpeHandlesToRemove.IsEmpty()) return;
-	// ClearAbility 只能在服务器调用（引擎限制），客户端跳过
+	// ClearAbility 只能在服务器调用
 	if (GetOwnerActor() && !GetOwnerActor()->HasAuthority()) return;
 	for (const FGameplayAbilitySpecHandle& SpecHandle : InSpeHandlesToRemove)
 	{
@@ -121,32 +121,18 @@ void UWarriorAbilitySystemComponent::RemoveGrantedHeroWeaponAbilities(
 			ClearAbility(SpecHandle);
 		}
 	}
-	// 循环结束后统一清空，避免迭代器失效
 	InSpeHandlesToRemove.Empty();
 }
 
 bool UWarriorAbilitySystemComponent::TryActivateAbilityByTag(FGameplayTag AbilityTagToActivate)
 {
 	check(AbilityTagToActivate.IsValid());
-
-	// ===== 诊断日志：定位 SpawnStone 不触发的断点 =====
+	
 	const bool bAuthority = GetOwnerActor() && GetOwnerActor()->HasAuthority();
 	UE_LOG(LogTemp, Warning, TEXT("[TryActivateByTag] >>> tag=%s authority=%d owner=%s"),
 		*AbilityTagToActivate.ToString(), bAuthority ? 1 : 0,
 		GetOwnerActor() ? *GetOwnerActor()->GetName() : TEXT("NULL"));
-
-	// 打印当前 ASC 上所有仍被授予的能力（排查：没授予 / 被 OnGiven 的 ClearAbility 移除 / Ability Tags 配错）
-	for (const FGameplayAbilitySpec& Spec : GetActivatableAbilities())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("  [Granted] %s active=%d tags=[%s]"),
-			Spec.Ability ? *Spec.Ability->GetName() : TEXT("NULL"),
-			Spec.IsActive() ? 1 : 0,
-			Spec.Ability ? *Spec.Ability->AbilityTags.ToStringSimple() : TEXT(""));
-	}
-
-	// ===== 诊断日志2：定位 tag 命中但 GetActivatableGameplayAbilitySpecsByAllMatchingTags 仍 matched=0 的原因 =====
-	// 该函数内部还会调用 DoesAbilitySatisfyTagRequirements（检查 Blocked/Required Tag 条件），这里手动复算并打印细节
-	UE_LOG(LogTemp, Warning, TEXT("  [OwnedTags] %s"), *GetOwnedGameplayTags().ToStringSimple());
+	
 	for (const FGameplayAbilitySpec& Spec : GetActivatableAbilities())
 	{
 		if (!Spec.Ability) continue;
@@ -166,13 +152,7 @@ bool UWarriorAbilitySystemComponent::TryActivateAbilityByTag(FGameplayTag Abilit
 	TArray<FGameplayAbilitySpec*> AbilitySpecs;
 	GetActivatableGameplayAbilitySpecsByAllMatchingTags(AbilityTagToActivate.GetSingleTagContainer(),AbilitySpecs);
 
-	UE_LOG(LogTemp, Warning, TEXT("[TryActivateByTag] matched=%d"), AbilitySpecs.Num());
-	for (FGameplayAbilitySpec* Spec : AbilitySpecs)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("  [Matched] %s active=%d"),
-			Spec && Spec->Ability ? *Spec->Ability->GetName() : TEXT("NULL"),
-			Spec ? (Spec->IsActive() ? 1 : 0) : -1);
-	}
+	
 
 	if (AbilitySpecs.Num() != 0)
 	{

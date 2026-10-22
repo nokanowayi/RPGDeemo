@@ -107,9 +107,7 @@ void AWarriorHeroCharacter::PossessedBy(AController* NewController)
 void AWarriorHeroCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	// 角色 Transform 由 CharacterMovement 自动复制，无需手动声明
-	// 如需复制自定义属性（如装备状态），在这里 DOREPLIFETIME
+	
 }
 
 void AWarriorHeroCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)

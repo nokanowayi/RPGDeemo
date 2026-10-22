@@ -51,7 +51,6 @@ void AWarriorBaseCharacter::PossessedBy(AController* NewController)
 
 	if (WarriorAbilitySystemComponent)
 	{
-		// 服务器端：设置为复制模式
 		WarriorAbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
 		WarriorAbilitySystemComponent->InitAbilityActorInfo(this, this);
 
@@ -59,8 +58,7 @@ void AWarriorBaseCharacter::PossessedBy(AController* NewController)
 		{
 			WarriorAbilitySystemComponent->AddAttributeSetSubobject(WarriorAttributeSet);
 		}
-
-		// 标记 ASC 已初始化也就是player，敌人没有 PlayerState，靠这个触发客户端初始化
+		
 		bAbilitySystemInitialized = true;
 
 		ensureMsgf(!CharacterStartUpData.IsNull(), TEXT("CharacterStartUpData is null, please assign CharacterStartUpData in %s"), *GetName());
@@ -70,8 +68,7 @@ void AWarriorBaseCharacter::PossessedBy(AController* NewController)
 void AWarriorBaseCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
-
-	// 客户端（玩家）初始化
+	
 	InitializeAbilitySystemForClient();
 }
 
@@ -84,19 +81,16 @@ void AWarriorBaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 
 void AWarriorBaseCharacter::OnRep_AbilitySystemInitialized()
 {
-	// 客户端（敌人）初始化
 	InitializeAbilitySystemForClient();
 }
 
 void AWarriorBaseCharacter::InitializeAbilitySystemForClient()
 {
 	if (!WarriorAbilitySystemComponent) return;
-	if (WarriorAbilitySystemComponent->GetAvatarActor() == this) return; // 已初始化
+	if (WarriorAbilitySystemComponent->GetAvatarActor() == this) return;
 
 	WarriorAbilitySystemComponent->InitAbilityActorInfo(this, this);
-
-	// 客户端也必须把 AttributeSet 挂到 ASC：
-	// 否则 showdebug abilitysystem 看不到属性集、GetAttributeSet 返回 null、属性复制(OnRep)也收不到
+	
 	if (WarriorAttributeSet)
 	{
 		WarriorAbilitySystemComponent->AddAttributeSetSubobject(WarriorAttributeSet);
@@ -104,7 +98,6 @@ void AWarriorBaseCharacter::InitializeAbilitySystemForClient()
 
 	// 客户端 ASC 初始化后，激活 OnGiven 策略的能力（如 HUD 创建）
 	// 服务器在 GiveAbility 时已通过 OnGiveAbility 激活，客户端需要手动补激活
-	// 能力列表可能尚未复制完成，延迟几帧重试
 	ActivateOnGivenAbilitiesForClient();
 }
 

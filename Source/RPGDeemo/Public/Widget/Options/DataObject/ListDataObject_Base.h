@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "WarriorTypes/WarriorEnumTypes.h"
 #include "ListDataObject_Base.generated.h"
 
 #define LIST_DATA_ACCESSOR(DataType,PropertyName) \
@@ -12,11 +13,13 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract)
 class RPGDEEMO_API UListDataObject_Base : public UObject
 {
 	GENERATED_BODY()
 public:
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnListDataModified, UListDataObject_Base*, EOptionsListDataModifyReason);
+	FOnListDataModified OnListDataModified;
 	LIST_DATA_ACCESSOR(FName, DataID)
 	LIST_DATA_ACCESSOR(FText, DescriptionRichText)
 	LIST_DATA_ACCESSOR(FText, DisplayName)
@@ -31,7 +34,8 @@ public:
 
 protected:
 	virtual void OnDataObjectInit();
-	
+
+	virtual void NotifyListDataModified(UListDataObject_Base* ModifyData,EOptionsListDataModifyReason ModifyReason = EOptionsListDataModifyReason::DirectlyModified);
 private:
 	FName DataID;
 	FText DescriptionRichText;

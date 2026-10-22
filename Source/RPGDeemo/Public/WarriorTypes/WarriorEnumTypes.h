@@ -58,13 +58,6 @@ enum class EConfirmScreenButtonType : uint8
 	Unknown UMETA(Hidden)
 };
 
-/**
- * 生存模式的状态机状态。
- *
- * 注意：这个枚举原来定义在 WarriorSurvialGameMode.h 里，现在挪到这里 ——
- * 因为 AWarriorSurvialGameState 也要用它，而 GameState 与 GameMode 不能互相 include。
- * 枚举在蓝图里的引用是按"模块 + 枚举名"解析的，所以挪动文件不会让已有蓝图节点失效。
- */
 UENUM(BlueprintType)
 enum class ESurvivalGameModeState : uint8
 {
@@ -74,4 +67,13 @@ enum class ESurvivalGameModeState : uint8
 	WaveComplete,
 	AllWaveDone,
 	PlayerDie
+};
+
+UENUM(BlueprintType)
+enum class EOptionsListDataModifyReason : uint8
+{
+	DirectlyModified,
+	DependencyModified,
+	ResetToDefaults
+	
 };

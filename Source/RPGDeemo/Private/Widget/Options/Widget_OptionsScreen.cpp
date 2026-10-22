@@ -69,5 +69,10 @@ void UWidget_OptionsScreen::OnBackBoundActionTriggered()
 
 void UWidget_OptionsScreen::OnOptionsTabSelected(FName TabId)
 {
-	Debug::Print(FString::Printf(TEXT("Options Tab Selected: %s"), *TabId.ToString()), 5.f, FColor::Green);
+	TArray<UListDataObject_Base*> FoundItems = GetOrCreateDataRegistry()->GetListSourceItemsBySelectedTabID(TabId);
+
+	CommonListView_OptionsList->SetListItems(FoundItems);
+	CommonListView_OptionsList->RequestRefresh();
+	CommonListView_OptionsList->NavigateToIndex(0);
+	CommonListView_OptionsList->SetSelectedIndex(0);
 }

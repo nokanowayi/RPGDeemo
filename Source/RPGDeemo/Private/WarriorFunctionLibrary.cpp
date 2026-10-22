@@ -153,8 +153,29 @@ bool UWarriorFunctionLibrary::IsValidBlock(AActor* InAttacker, AActor* InDefende
 bool UWarriorFunctionLibrary::ApplyGameplayEffectSpecHandleToTargetActor(AActor* InInstigator, AActor* InTargetActor,
 	const FGameplayEffectSpecHandle InSpecHandle)
 {
-	UWarriorAbilitySystemComponent* InstigatorASC = NativeGetWarriorASCFromActor(InInstigator);
-	UWarriorAbilitySystemComponent* TargetASC = NativeGetWarriorASCFromActor(InTargetActor);
+	// 句柄为空时 *InSpecHandle.Data 会直接触发 SharedPointer.h 的 check(IsValid()) 断言崩编辑器，
+	// 这里改成可诊断的失败返回
+	if (!InSpecHandle.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("[ApplyGE] SpecHandle 无效（Data 为空）：Instigator=%s Target=%s"),
+			*GetNameSafe(InInstigator), *GetNameSafe(InTargetActor));
+		return false;
+	}
+
+	// 不能用 NativeGetWarriorASCFromActor：它内部是 CastChecked，
+	// 命中一个没有 ASC 的 Pawn 会在这里再断言崩一次
+	UWarriorAbilitySystemComponent* InstigatorASC = Cast<UWarriorAbilitySystemComponent>(
+		UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(InInstigator));
+	UWarriorAbilitySystemComponent* TargetASC = Cast<UWarriorAbilitySystemComponent>(
+		UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(InTargetActor));
+
+	if (!InstigatorASC || !TargetASC)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[ApplyGE] 缺少 ASC：Instigator=%s(%s) Target=%s(%s)"),
+			*GetNameSafe(InInstigator), InstigatorASC ? TEXT("有") : TEXT("无"),
+			*GetNameSafe(InTargetActor), TargetASC ? TEXT("有") : TEXT("无"));
+		return false;
+	}
 
 	FActiveGameplayEffectHandle ActiveGameplayEffectHandle = InstigatorASC->ApplyGameplayEffectSpecToTarget(*InSpecHandle.Data, TargetASC);
 

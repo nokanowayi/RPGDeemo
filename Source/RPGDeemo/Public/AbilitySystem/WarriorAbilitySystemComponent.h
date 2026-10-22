@@ -21,14 +21,11 @@ class RPGDEEMO_API UWarriorAbilitySystemComponent : public UAbilitySystemCompone
 public:
 	void OnAbilityInputPressed(FGameplayTag& InputTag);
 	void OnAbilityInputReleased(FGameplayTag& InputTag);
-
-	/** 蒙太奇复制调试：服务器端播放蒙太奇 */
+	
 	virtual float PlayMontage(UGameplayAbility* AnimatingAbility, FGameplayAbilityActivationInfo ActivationInfo, UAnimMontage* Montage, float InPlayRate, FName StartSectionName = NAME_None, float StartTimeSeconds = 0.0f) override;
-
-	/** 蒙太奇复制调试：模拟端（客户端）播放蒙太奇 */
+	
 	virtual float PlayMontageSimulated(UAnimMontage* Montage, float InPlayRate, FName StartSectionName = NAME_None) override;
-
-	/** 蒙太奇复制调试：客户端收到复制的蒙太奇 */
+	
 	virtual void OnRep_ReplicatedAnimMontage() override;
 
 	UFUNCTION(blueprintCallable,Category="Warrior/Ability",meta = (ApplyLevel = "1"))

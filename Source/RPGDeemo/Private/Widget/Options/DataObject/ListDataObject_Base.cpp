@@ -12,3 +12,9 @@ void UListDataObject_Base::OnDataObjectInit()
 {
 	
 }
+
+void UListDataObject_Base::NotifyListDataModified(UListDataObject_Base* ModifyData,
+	EOptionsListDataModifyReason ModifyReason)
+{
+	OnListDataModified.Broadcast(ModifyData, ModifyReason);
+}

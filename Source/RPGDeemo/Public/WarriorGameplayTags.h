@@ -27,8 +27,12 @@ namespace WarriorGameplayTags
     /** Player **/
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Ability_Equip_Axe);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Ability_Unequip_Axe);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Ability_Equip_kanata);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Ability_Unequip_kanata);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Ability_Attack_Light_Axe);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Ability_Attack_Heavy_Axe);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Ability_Attack_Light_Kanata);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Ability_Attack_Heavy_kanata);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Ability_HitPause);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Ability_Roll);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Ability_Block);
@@ -46,6 +50,8 @@ namespace WarriorGameplayTags
 
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Event_Equip_Axe);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Event_Unequip_Axe);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Event_Equip_Kanata);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Event_Unequip_Kanata);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Event_HitPause);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Event_SuccessfulBlock);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Event_SwitchTarget_Left);

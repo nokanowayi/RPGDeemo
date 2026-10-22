@@ -46,10 +46,11 @@ AWarriorProjectileBase::AWarriorProjectileBase()
 void AWarriorProjectileBase::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	ProjectileCollisionBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 
 	if (DamagePolicy == EProjectileDamagePolicy::OnBeginOverlap)
 	{
-		ProjectileCollisionBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 		ProjectileCollisionBox->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Overlap);
 		ProjectileCollisionBox->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
 	}
@@ -60,7 +61,7 @@ void AWarriorProjectileBase::OnProjectileHit(UPrimitiveComponent* HitComponent, 
 	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	
-	// 防止打到自己：Instigator 或 Owner 是自己都直接忽略
+	// 防止打到自己直接忽略
 	if (OtherActor == GetInstigator() || OtherActor == GetOwner())
 	{
 		return;
@@ -68,15 +69,17 @@ void AWarriorProjectileBase::OnProjectileHit(UPrimitiveComponent* HitComponent, 
 
 	APawn* HitPawn = Cast<APawn>(OtherActor);
 	
-	if (!HitPawn||UWarriorFunctionLibrary::IsTargetPawnHostile(GetInstigator(), HitPawn))
+	// 撞到非 Pawn直接销毁
+	if (!HitPawn)
 	{
-		if (UWarriorFunctionLibrary::IsTargetPawnHostile(GetInstigator(), HitPawn))
-		{
-			// 调试：打印命中者、发射者、双方队伍 ID（-1 = 无队伍接口）
-			const IGenericTeamAgentInterface* InstigatorTeam = GetInstigator() ? Cast<const IGenericTeamAgentInterface>(GetInstigator()->GetController()) : nullptr;
-			const IGenericTeamAgentInterface* TargetTeam = Cast<const IGenericTeamAgentInterface>(HitPawn->GetController());
-		}
 		Destroy();
+		return;
+	}
+
+	// 同阵营 Pawn忽略，而不是把火球销毁，同时加入移动忽略列表，保证后续 sweep 也不会被它挡住
+	if (UWarriorFunctionLibrary::IsTargetPawnHostile(GetInstigator(), HitPawn))
+	{
+		ProjectileCollisionBox->IgnoreActorWhenMoving(HitPawn, true);
 		return;
 	}
 	
@@ -123,13 +126,23 @@ void AWarriorProjectileBase::OnProjectileBeginOverlap(UPrimitiveComponent* Overl
 
 	if(APawn* HitPawn = Cast<APawn>(OtherActor))
 	{
-		if (!UWarriorFunctionLibrary::IsTargetPawnHostile(GetInstigator(), HitPawn))
+		// 同阵营接忽略，不结算也不销毁火球，并加入移动忽略列表
+		if (UWarriorFunctionLibrary::IsTargetPawnHostile(GetInstigator(), HitPawn))
 		{
-			FGameplayEventData Data;
-			Data.Instigator = GetInstigator();
-			Data.Target = HitPawn;
+			ProjectileCollisionBox->IgnoreActorWhenMoving(HitPawn, true);
+			return;
+		}
 
-			HandleApplyProjectileDamage(HitPawn,Data);
+		FGameplayEventData Data;
+		Data.Instigator = GetInstigator();
+		Data.Target = HitPawn;
+
+		HandleApplyProjectileDamage(HitPawn,Data);
+
+		
+		if (DamagePolicy == EProjectileDamagePolicy::OnHit && HasAuthority())
+		{
+			Destroy();
 		}
 	}
 	
@@ -137,6 +150,22 @@ void AWarriorProjectileBase::OnProjectileBeginOverlap(UPrimitiveComponent* Overl
 
 void AWarriorProjectileBase::HandleApplyProjectileDamage(APawn* InHitPawn,const FGameplayEventData& Data)
 {
+	
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	
+	if (!ProjectileDamageEffectSpecHandle.IsValid())
+	{
+		UE_LOG(LogTemp, Error,
+			TEXT("[Projectile] 伤害规格为空！命中=%s 发射者=%s NetMode=%d —— 检查投射物 SpawnActor 节点的 ")
+			TEXT("ProjectileDamageEffectSpecHandle 引脚，以及上游 MakeOutgoingGameplayEffectSpec 的 GameplayEffectClass"),
+			*GetNameSafe(InHitPawn), *GetNameSafe(GetInstigator()), (int32)GetNetMode());
+		return;
+	}
+
 	const bool bWasSuccessful = UWarriorFunctionLibrary::ApplyGameplayEffectSpecHandleToTargetActor(GetInstigator(), InHitPawn, ProjectileDamageEffectSpecHandle);
 	if (bWasSuccessful)
 	{

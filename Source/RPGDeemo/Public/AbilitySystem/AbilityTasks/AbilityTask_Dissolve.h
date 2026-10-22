@@ -21,13 +21,7 @@ class RPGDEEMO_API UAbilityTask_Dissolve : public UAbilityTask
 
 public:
 	UAbilityTask_Dissolve();
-
-	/**
-	 * 创建溶解任务
-	 * @param Mesh 要溶解的骨骼网格（可用按类获取组件拿到）
-	 * @param Duration 溶解时长（秒）
-	 * @param ParameterName 材质标量参数名（默认 DissolveAmount）
-	 */
+	
 	UFUNCTION(BlueprintCallable, Category = "Ability|Tasks", meta = (HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "true"))
 	static UAbilityTask_Dissolve* CreateDissolveTask(UGameplayAbility* OwningAbility, USkeletalMeshComponent* Mesh, float Duration, FName ParameterName = TEXT("DissolveAmount"));
 
@@ -46,13 +40,10 @@ private:
 	/** 为 Mesh 各材质槽创建的动态材质实例（静态 MI 无法直接设置参数，必须走 MID） */
 	UPROPERTY()
 	TArray<TObjectPtr<UMaterialInstanceDynamic>> DynamicMaterials;
-
-	/** 溶解总时长（秒） */
+	
 	float Duration = 2.f;
-
-	/** 已过去时间 */
+	
 	float Elapsed = 0.f;
-
-	/** 材质参数名 */
+	
 	FName ParameterName = TEXT("DissolveAmount");
 };

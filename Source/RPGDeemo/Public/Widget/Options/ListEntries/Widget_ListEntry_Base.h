@@ -21,6 +21,8 @@ class RPGDEEMO_API UWidget_ListEntry_Base : public UCommonUserWidget,public IUse
 	void BP_OnListEntryWidgetHovered(bool bWasHovered,bool bIsEntryWidgetStillSelected);
 	void NativeOnListEntryWidgetHovered(bool bWasHovered);
 
+
+
 protected:
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 

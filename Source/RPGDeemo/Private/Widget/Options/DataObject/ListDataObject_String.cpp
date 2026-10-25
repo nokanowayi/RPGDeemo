@@ -5,6 +5,32 @@
 
 #include "WarriorDebugHelper.h"
 
+void UListDataObject_String::OnDataObjectInit()
+{
+	if (!AvailableOptionsTextArray.IsEmpty())
+	{
+		CurrentStringValue = AvailableOptionsStringArray[0];
+	}
+
+	if (HasDefaultValue())
+	{
+		CurrentStringValue = GetDefaultValueString();
+	}
+	
+	if (DataDynamicGetter)
+	{
+		if (DataDynamicGetter.IsValid())
+		{
+			CurrentStringValue = DataDynamicGetter->GetValueAsString();
+		}
+
+	}
+	if (!TrySetDisplayTextFromStringValue(CurrentStringValue))
+	{
+		CurrentTextValue = FText::FromString("Invalid Value");
+	}
+}
+
 void UListDataObject_String::AddDynamicOption(const FString& InOptionString, const FText& InOptionText)
 {
 	AvailableOptionsStringArray.Add(InOptionString);
@@ -64,26 +90,7 @@ void UListDataObject_String::BackToPreviousOption()
 	}
 }
 
-void UListDataObject_String::OnDataObjectInit()
-{
-	if (!AvailableOptionsTextArray.IsEmpty())
-	{
-		CurrentStringValue = AvailableOptionsStringArray[0];
-	}
 
-	if (DataDynamicGetter)
-	{
-		if (DataDynamicGetter.IsValid())
-		{
-			CurrentStringValue = DataDynamicGetter->GetValueAsString();
-		}
-
-	}
-	if (!TrySetDisplayTextFromStringValue(CurrentStringValue))
-	{
-		CurrentTextValue = FText::FromString("Invalid Value");
-	}
-}
 
 bool UListDataObject_String::TrySetDisplayTextFromStringValue(const FString& InStringValue)
 {
@@ -95,4 +102,26 @@ bool UListDataObject_String::TrySetDisplayTextFromStringValue(const FString& InS
 	}
 
 	return  false;
+}
+
+bool UListDataObject_String::CanResetBackToDefaultValue() const
+{
+	return HasDefaultValue() && CurrentStringValue != GetDefaultValueString();
+}
+
+bool UListDataObject_String::TryResetBackToDefaultValue()
+{
+	if (CanResetBackToDefaultValue())
+	{
+		CurrentStringValue = GetDefaultValueString();
+		TrySetDisplayTextFromStringValue(CurrentStringValue);
+
+		if (DataDynamicSetter.IsValid())
+		{
+			DataDynamicSetter->SetValueAsString(CurrentStringValue);
+			NotifyListDataModified(this,EOptionsListDataModifyReason::ResetToDefault);
+		}
+		return true;
+	}
+	return false;
 }

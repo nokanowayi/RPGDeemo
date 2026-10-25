@@ -75,6 +75,10 @@ public:
 	
 	UFUNCTION(BlueprintPure, Category = "Warrior|FunctionLibrary")
 	static TSoftClassPtr<UWidget_ActivatableBase> GetFrontendWidgetClassByTag(UPARAM (meta = (Categories = "UI.Widget"))FGameplayTag InTag);
+
+	UFUNCTION(BlueprintPure, Category = "Warrior|FunctionLibrary")
+	static TSoftObjectPtr<UTexture2D> GetOptionsSoftImageByTag(UPARAM (meta = (Categories = "UI.Image"))FGameplayTag InTag);
+	
 	
 	UFUNCTION(BlueprintCallable, Category = "Warrior|FunctionLibrary")
 	static void StartDissolveOnActor(AActor* TargetActor, float Duration = 3.0f, FName ParameterName = TEXT("DissolveAmount"));

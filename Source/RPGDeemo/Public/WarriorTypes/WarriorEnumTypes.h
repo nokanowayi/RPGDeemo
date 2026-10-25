@@ -74,6 +74,6 @@ enum class EOptionsListDataModifyReason : uint8
 {
 	DirectlyModified,
 	DependencyModified,
-	ResetToDefaults
+	ResetToDefault
 	
 };

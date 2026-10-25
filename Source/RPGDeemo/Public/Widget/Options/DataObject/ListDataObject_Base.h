@@ -33,7 +33,9 @@ public:
 	virtual bool HasAnyChildListData() const { return false; }
 
 	void SetShouldApplySettingsImmediately(bool bShouldApply) { bShouldApplyChangeImmediately = bShouldApply; }
-	
+	virtual bool HasDefaultValue()const {return false;};
+	virtual bool CanResetBackToDefaultValue()const {return false;};
+	virtual bool TryResetBackToDefaultValue(){return false;};
 protected:
 	virtual void OnDataObjectInit();
 

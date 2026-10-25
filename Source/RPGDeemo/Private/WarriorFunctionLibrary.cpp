@@ -306,6 +306,13 @@ TSoftClassPtr<UWidget_ActivatableBase> UWarriorFunctionLibrary::GetFrontendWidge
 	return  Settings->FrontendWidgetMap.FindRef(InTag);
 }
 
+TSoftObjectPtr<UTexture2D> UWarriorFunctionLibrary::GetOptionsSoftImageByTag(FGameplayTag InTag)
+{
+	const UFrontendDeveloperSettings* Settings = GetDefault<UFrontendDeveloperSettings>();
+
+	return Settings->OptionsScreenSoftImageMap.FindRef(InTag);
+}
+
 void UWarriorFunctionLibrary::StartDissolveOnActor(AActor* TargetActor, float Duration, FName ParameterName)
 {
 	if (!IsValid(TargetActor))

@@ -22,6 +22,8 @@ protected:
 	virtual void OnDataObjectInit() override;
 
 	bool TrySetDisplayTextFromStringValue(const FString& InStringValue);
+	virtual bool CanResetBackToDefaultValue()const override;
+	virtual bool TryResetBackToDefaultValue() override;
 	
 	FString CurrentStringValue;
 	FText  CurrentTextValue;

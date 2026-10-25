@@ -87,6 +87,9 @@ namespace WarriorGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(UI_Widget_MainMenuScreen,"UI.Widget.MainMenuScreen");
 	UE_DEFINE_GAMEPLAY_TAG(UI_Widget_ConfirmScreen,"UI.Widget.ConfirmScreen");
 	UE_DEFINE_GAMEPLAY_TAG(UI_Widget_OptionsScreen,"UI.Widget.OptionsScreen");
+
+	UE_DEFINE_GAMEPLAY_TAG(UI_Image_TestImage,"UI.Image.TestImage");
+	UE_DEFINE_GAMEPLAY_TAG(UI_Image_RowImage,"UI.Image.RowImage");
 	
 	/** Shared Tags **/
 	UE_DEFINE_GAMEPLAY_TAG(Shared_Ability_HitReact,"Shared.Ability.HitReact");

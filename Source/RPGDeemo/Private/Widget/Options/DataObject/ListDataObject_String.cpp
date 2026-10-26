@@ -125,3 +125,32 @@ bool UListDataObject_String::TryResetBackToDefaultValue()
 	}
 	return false;
 }
+
+void UListDataObject_StringBool::OnDataObjectInit()
+{
+	TryInitBoolValues();
+	Super::OnDataObjectInit();
+}
+
+void UListDataObject_StringBool::SetTrueAsDefaultValue()
+{
+	SetDefaultValueString(TrueString);
+}
+
+void UListDataObject_StringBool::SetFalseAsDefaultValue()
+{
+	SetDefaultValueString(FalseString);
+}
+
+//UListDataObject_StringBool
+void UListDataObject_StringBool::TryInitBoolValues()
+{
+	if (!AvailableOptionsStringArray.Contains(TrueString))
+	{
+		AddDynamicOption(TrueString, FText::FromString(TEXT("On")));
+	}
+    if (!AvailableOptionsStringArray.Contains(FalseString))
+	{
+		AddDynamicOption(FalseString, FText::FromString(TEXT("Off")));
+	}
+}

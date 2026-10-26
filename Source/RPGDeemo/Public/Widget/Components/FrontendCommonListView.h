@@ -18,6 +18,7 @@ class RPGDEEMO_API UFrontendCommonListView : public UCommonListView
 protected:
 	virtual UUserWidget& OnGenerateEntryWidgetInternal(UObject* Item, TSubclassOf<UUserWidget> DesiredEntryClass, const TSharedRef<STableViewBase>& OwnerTable) override;
 
+	virtual bool OnIsSelectableOrNavigableInternal(UObject* FirstSelectedItem) override;
 private:
 	UPROPERTY(EditAnywhere, Category = "Frontend Common List View")
 	UDataAsset_DataListEntryMapping* DataListEntryMapping;

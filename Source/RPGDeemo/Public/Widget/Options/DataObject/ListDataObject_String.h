@@ -34,3 +34,21 @@ public:
 	FORCEINLINE const TArray<FText>& GetAvailableOptionsTextArray() const { return AvailableOptionsTextArray; }
 	FORCEINLINE const FText& GetCurrentTextValue() const { return CurrentTextValue; }
 };
+
+UCLASS()
+class RPGDEEMO_API UListDataObject_StringBool : public UListDataObject_String
+{
+	GENERATED_BODY()
+public:
+	void SetTrueAsDefaultValue();
+	void SetFalseAsDefaultValue();
+protected:
+	virtual void OnDataObjectInit() override;
+
+
+private:
+	void TryInitBoolValues();
+	
+	const FString TrueString = TEXT("True");
+	const FString FalseString = TEXT("False");
+};

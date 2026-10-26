@@ -7,6 +7,7 @@
 #include "WarriorGameplayTags.h"
 #include "Widget/Options/DataObject/ListDataObject_String.h"
 #include "Widget/Options/DataObject/ListDataObject_Collection.h"
+#include "Widget/Options/DataObject/ListDataObject_Scalar.h"
 
 class UFrontendGameUserSettings;
 #define MAKE_OPTIONS_DATA_CONTROL(SetterOrGetterFuncName) \
@@ -29,7 +30,36 @@ TArray<UListDataObject_Base*> UOptionsDataRegistry::GetListSourceItemsBySelected
 		return Collection->GetDataID() == InSelectedTabID;
 	});
 	UListDataObject_Collection* FoundTabCollection = *FoundTabCollectionPtr;
-	return FoundTabCollection->GetAllChildListData();
+	TArray<UListDataObject_Base*> AllResultItems;
+
+	for (auto ChildListData : FoundTabCollection->GetAllChildListData())
+	{
+		if (!ChildListData) continue;
+
+		AllResultItems.Add(ChildListData);
+
+		if (ChildListData->HasAnyChildListData())
+		{
+			FindChildListData(Cast<UListDataObject_Collection>(ChildListData), AllResultItems);
+		}
+	}
+
+	return AllResultItems;
+}
+
+void UOptionsDataRegistry::FindChildListData(UListDataObject_Base* InCollection,
+	TArray<UListDataObject_Base*>& OutResultItems) const
+{
+	if (!InCollection||!InCollection->HasAnyChildListData()) return;
+	for (auto ChildListData : InCollection->GetAllChildListData())
+	{
+		if (!ChildListData) continue;
+		OutResultItems.Add(ChildListData);
+		if (ChildListData->HasAnyChildListData())
+		{
+			FindChildListData(ChildListData, OutResultItems);
+		}
+	}
 }
 
 void UOptionsDataRegistry::InitGameplayCollectionTab()
@@ -77,7 +107,66 @@ void UOptionsDataRegistry::InitAudioCollectionTab()
 	UListDataObject_Collection* AudioCollectionData = NewObject<UListDataObject_Collection>();
 	AudioCollectionData->SetDataID(FName(TEXT("AudioTabCollection")));
 	AudioCollectionData->SetDisplayName(FText::FromString(TEXT("Audio")));
+	//Volume
+	{
+		UListDataObject_Collection* VolumeCategoryCollection = NewObject<UListDataObject_Collection>();
+		VolumeCategoryCollection->SetDataID(FName(TEXT("VolumeCategoryCollection")));
+		VolumeCategoryCollection->SetDisplayName(FText::FromString(TEXT("Volume")));
 
+		AudioCollectionData->AddChildListData(VolumeCategoryCollection);
+		{
+			UListDataObject_Scalar* OverAllVolume = NewObject<UListDataObject_Scalar>();
+			OverAllVolume->SetDataID(FName(TEXT("OverAllVolume")));
+			OverAllVolume->SetDisplayName(FText::FromString(TEXT("Overall Volume")));
+			OverAllVolume->SetDescriptionRichText(FText::FromString(TEXT("Adjust The Overall Volume Of The Game.")));
+			OverAllVolume->SetDisplayValueRange(TRange<float>(0.f, 1.f));
+			OverAllVolume->SetOutPutValueRange(TRange<float>(0.f, 2.f));
+			OverAllVolume->SetSliderStepSize(0.01f);
+			OverAllVolume->SetDefaultValueString(LexToString(1.f));
+			OverAllVolume->SetDisplayNumericType(ECommonNumericType::Percentage);
+			OverAllVolume->SetNumberFormattingOptions(UListDataObject_Scalar::NoDecimal());
+			OverAllVolume->SetDataDynamicGetter(MAKE_OPTIONS_DATA_CONTROL(GetOverallVolume));
+			OverAllVolume->SetDataDynamicSetter(MAKE_OPTIONS_DATA_CONTROL(SetOverallVolume));
+
+			VolumeCategoryCollection->AddChildListData(OverAllVolume);
+		}
+		{
+			UListDataObject_Scalar* MusicVolume = NewObject<UListDataObject_Scalar>();
+			MusicVolume->SetDataID(FName(TEXT("Music Volume")));
+			MusicVolume->SetDisplayName(FText::FromString(TEXT("Music Volume")));
+			MusicVolume->SetDescriptionRichText(FText::FromString(TEXT("Adjust The Music Volume Of The Game.")));
+			MusicVolume->SetDisplayValueRange(TRange<float>(0.f, 1.f));
+			MusicVolume->SetOutPutValueRange(TRange<float>(0.f, 2.f));
+			MusicVolume->SetSliderStepSize(0.01f);
+			MusicVolume->SetDefaultValueString(LexToString(1.f));
+			MusicVolume->SetDisplayNumericType(ECommonNumericType::Percentage);
+			MusicVolume->SetNumberFormattingOptions(UListDataObject_Scalar::NoDecimal());
+			MusicVolume->SetDataDynamicGetter(MAKE_OPTIONS_DATA_CONTROL(GetOverallVolume));
+			MusicVolume->SetDataDynamicSetter(MAKE_OPTIONS_DATA_CONTROL(SetOverallVolume));
+
+			VolumeCategoryCollection->AddChildListData(MusicVolume);
+		}
+	}
+    //Sound
+	{
+		UListDataObject_Collection* SoundCategoryCollection = NewObject<UListDataObject_Collection>();
+		SoundCategoryCollection->SetDataID(FName(TEXT("SoundCategoryCollection")));
+		SoundCategoryCollection->SetDisplayName(FText::FromString(TEXT("Sound")));
+
+		AudioCollectionData->AddChildListData(SoundCategoryCollection);
+		{
+			UListDataObject_StringBool* AllowBackGroundAudio = NewObject<UListDataObject_StringBool>();
+			AllowBackGroundAudio->SetDataID(FName(TEXT("AllowBackGroundAudio")));
+			AllowBackGroundAudio->SetDisplayName(FText::FromString(TEXT("Allow Background Audio")));
+			AllowBackGroundAudio->SetDescriptionRichText(FText::FromString(TEXT("Allow The Game To Play Audio In The Background.")));
+			AllowBackGroundAudio->SetFalseAsDefaultValue();
+			AllowBackGroundAudio->SetDataDynamicGetter(MAKE_OPTIONS_DATA_CONTROL(GetAllowBackGroundAudioVolume));
+			AllowBackGroundAudio->SetDataDynamicSetter(MAKE_OPTIONS_DATA_CONTROL(SetAllowBackGroundAudioVolume));
+			AllowBackGroundAudio->SetShouldApplySettingsImmediately(true);
+
+			SoundCategoryCollection->AddChildListData(AllowBackGroundAudio);
+		}
+	}
 	RegisteredOptionsTabCollections.Add(AudioCollectionData);
 }
 

@@ -6,8 +6,10 @@ namespace WarriorGameplayTags
 {
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_Move, "InputTag.Move");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_Look, "InputTag.Look");
-	UE_DEFINE_GAMEPLAY_TAG(InputTag_Equip, "InputTag.Equip");
-	UE_DEFINE_GAMEPLAY_TAG(InputTag_Unequip, "InputTag.Unequip");
+	UE_DEFINE_GAMEPLAY_TAG(InputTag_Equip_Axe, "InputTag.Equip.Axe");
+	UE_DEFINE_GAMEPLAY_TAG(InputTag_Equip_Kanata, "InputTag.Equip.Kanata");
+	UE_DEFINE_GAMEPLAY_TAG(InputTag_Unequip_Axe, "InputTag.Unequip.Axe");
+	UE_DEFINE_GAMEPLAY_TAG(InputTag_Unequip_Kanata, "InputTag.Unequip.Kanata");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_LightAttack_Axe, "InputTag.LightAttack.Axe");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_HeavyAttack_Axe, "InputTag.HeavyAttack.Axe");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_Roll, "InputTag.Roll");
@@ -41,6 +43,7 @@ namespace WarriorGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Player_CoolDown_SpecialWeaponAbility_Heavy,"Player.CoolDown.SpecialWeaponAbility.Heavy");
 	
 	UE_DEFINE_GAMEPLAY_TAG(Player_Weapon_Axe,"Player.Weapon.Axe");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Weapon_Kanata,"Player.Weapon.Kanata");
 	
 	UE_DEFINE_GAMEPLAY_TAG(Player_Event_Equip_Axe,"Player.Event.Equip.Axe");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Event_Unequip_Axe,"Player.Event.Unequip.Axe");

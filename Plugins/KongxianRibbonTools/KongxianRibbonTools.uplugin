@@ -1,0 +1,11 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0",
+  "FriendlyName": "Kongxian Ribbon Tools",
+  "Description": "Editor-only reproducible ribbon collision asset builder.",
+  "Category": "Editor",
+  "CanContainContent": false,
+  "EnabledByDefault": true,
+  "Modules": [{ "Name": "KongxianRibbonTools", "Type": "Editor", "LoadingPhase": "PostEngineInit" }]
+}

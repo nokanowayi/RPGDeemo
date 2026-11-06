@@ -5,6 +5,7 @@
 
 #include "Camera/CameraActor.h"
 #include "Kismet/GameplayStatics.h"
+#include "Settings/FrontendGameUserSettings.h"
 
 void AFrontendPlayerController::OnPossess(APawn* InPawn)
 {
@@ -16,5 +17,11 @@ void AFrontendPlayerController::OnPossess(APawn* InPawn)
 	if (!CameraActors.IsEmpty())
 	{
 		SetViewTarget(CameraActors[0]);
+	}
+	UFrontendGameUserSettings* FrontendGameUserSettings = UFrontendGameUserSettings::Get();
+	if (FrontendGameUserSettings->GetLastCPUBenchmarkResult() == -1.f||FrontendGameUserSettings->GetLastGPUBenchmarkResult() == -1.f)
+	{
+		FrontendGameUserSettings->RunHardwareBenchmark();
+		FrontendGameUserSettings->ApplyHardwareBenchmarkResults();
 	}
 }

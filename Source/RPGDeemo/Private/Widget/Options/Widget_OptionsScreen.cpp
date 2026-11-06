@@ -75,53 +75,55 @@ void UWidget_OptionsScreen::OnResetBoundActionTriggered()
 	{
 		return;
 	}
-	
+
+	// 先拷贝一份：重置会触发 OnListViewDataModified，它可能会修改 ResettableDataArray
+	const TArray<UListDataObject_Base*> DataToReset = ResettableDataArray;
 
 	UFrontendUISubsystem::Get(this)->PushConfirmScreenToModalStackAsync(
 		EConfirmScreenType::YesNo,
 		FText::FromString(TEXT("Reset")),
 		FText::FromString(TEXT("Are you sure you want to reset all options to their default values?")),
-		[this](EConfirmScreenButtonType InButtonType)
+		[this, DataToReset](EConfirmScreenButtonType InButtonType)
 		{
 			if (InButtonType != EConfirmScreenButtonType::Confirmed)
 			{
 				return;
 			}
-
+			
 			bIsResetting = true;
+
 			bool bHasDataFailedToReset = false;
-			for (UListDataObject_Base* TabCollection : ResettableDataArray)
+			for (UListDataObject_Base* DataToResetItem : DataToReset)
 			{
-				if (!TabCollection) continue;
-				if(TabCollection->TryResetBackToDefaultValue())
+				if (!DataToResetItem) continue;
+
+				if (DataToResetItem->TryResetBackToDefaultValue())
 				{
-					Debug::Print(FString::Printf(TEXT("Reset %s to default value."),*TabCollection->GetDisplayName().ToString()),5.f,FColor::Green);
+					Debug::Print(FString::Printf(TEXT("Reset %s to default value."), *DataToResetItem->GetDisplayName().ToString()), 5.f, FColor::Green);
 				}
 				else
 				{
 					bHasDataFailedToReset = true;
-					Debug::Print(FString::Printf(TEXT("Failed to reset %s to default value."),*TabCollection->GetDisplayName().ToString()),5.f,FColor::Red);
+					Debug::Print(FString::Printf(TEXT("Failed to reset %s to default value."), *DataToResetItem->GetDisplayName().ToString()), 5.f, FColor::Red);
+				}
+			}
+			
+			ResettableDataArray.Reset();
+			for (UListDataObject_Base* DataToResetItem : DataToReset)
+			{
+				if (DataToResetItem && DataToResetItem->CanResetBackToDefaultValue())
+				{
+					ResettableDataArray.AddUnique(DataToResetItem);
 				}
 			}
 
-			if (!bHasDataFailedToReset)
-			{
-				ResettableDataArray.Empty();
-                RemoveActionBinding(ResetActionHandle);
-			}
-
 			bIsResetting = false;
+			
+			if (!bHasDataFailedToReset && ResettableDataArray.IsEmpty())
+			{
+				RemoveActionBinding(ResetActionHandle);
+			}
 		});
-
-	for (UListDataObject_Base* ResettableData : ResettableDataArray)
-	{
-		if (!ResettableData) continue;
-
-		if (ResettableData->CanResetBackToDefaultValue())
-		{
-			ResettableData->TryResetBackToDefaultValue();
-		}
-	}
 }
 
 void UWidget_OptionsScreen::OnBackBoundActionTriggered()

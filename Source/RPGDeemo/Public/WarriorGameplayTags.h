@@ -8,8 +8,10 @@ namespace WarriorGameplayTags
 {
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Move);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Look);
-	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Equip);
-	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Unequip);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Equip_Axe);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Equip_Kanata);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Unequip_Axe);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Unequip_Kanata);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_LightAttack_Axe);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_HeavyAttack_Axe);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Roll);
@@ -47,6 +49,7 @@ namespace WarriorGameplayTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_CoolDown_SpecialWeaponAbility_Heavy);
 	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Weapon_Axe);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Weapon_Kanata);
 
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Event_Equip_Axe);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Event_Unequip_Axe);

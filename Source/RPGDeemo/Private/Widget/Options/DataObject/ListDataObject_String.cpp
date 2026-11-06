@@ -55,6 +55,13 @@ void UListDataObject_String::AdvanceToNextOption()
 
 	TrySetDisplayTextFromStringValue(CurrentStringValue);
 
+	// 诊断：Rotator 是否走到这里、值变成了什么、setter 是否有效
+	Debug::Print(FString::Printf(TEXT("[String] %s -> %s  (setter valid: %d, %s)"),
+		*GetDataID().ToString(), *CurrentStringValue,
+		DataDynamicSetter.IsValid() ? 1 : 0,
+		DataDynamicSetter.IsValid() ? TEXT("will call") : TEXT("SKIPPED")),
+		FColor::Cyan, 6.f, 9001);
+
 	if (DataDynamicSetter.IsValid())
 	{
 		DataDynamicSetter->SetValueAsString(CurrentStringValue);
@@ -130,6 +137,19 @@ void UListDataObject_StringBool::OnDataObjectInit()
 {
 	TryInitBoolValues();
 	Super::OnDataObjectInit();
+
+	// getter 可能返回数值字符串（float 的 0/1），统一归一化成 True/False，
+	// 否则匹配不上选项，会显示成 Invalid Value
+	if (!CurrentStringValue.Equals(TrueString, ESearchCase::IgnoreCase) &&
+		!CurrentStringValue.Equals(FalseString, ESearchCase::IgnoreCase))
+	{
+		const bool bIsTrue = CurrentStringValue.Equals(TEXT("1"), ESearchCase::IgnoreCase)
+			|| CurrentStringValue.Equals(TEXT("1.0"), ESearchCase::IgnoreCase)
+			|| CurrentStringValue.Equals(TEXT("1.0f"), ESearchCase::IgnoreCase);
+
+		CurrentStringValue = bIsTrue ? TrueString : FalseString;
+		TrySetDisplayTextFromStringValue(CurrentStringValue);
+	}
 }
 
 void UListDataObject_StringBool::SetTrueAsDefaultValue()

@@ -52,3 +52,29 @@ private:
 	const FString TrueString = TEXT("True");
 	const FString FalseString = TEXT("False");
 };
+
+UCLASS()
+class RPGDEEMO_API UListDataObject_StringEnum : public UListDataObject_String
+{
+	GENERATED_BODY()
+public:
+	template<typename TEnum>
+	void AddEnumOption(TEnum InEnumValue, const FText& InOptionText)
+	{
+		FString EnumString = StaticEnum<TEnum>()->GetNameStringByValue(static_cast<int64>(InEnumValue));
+		AddDynamicOption(EnumString, InOptionText);
+	}
+
+	template<typename TEnum>
+	TEnum GetCurrentEnumValue() const
+	{
+		return static_cast<TEnum>(StaticEnum<TEnum>()->GetValueByNameString(CurrentStringValue));
+	}
+
+	template<typename TEnum>
+	void SetDefaultValue(TEnum InEnumValue)
+	{
+		FString EnumString = StaticEnum<TEnum>()->GetNameStringByValue(static_cast<int64>(InEnumValue));
+		SetDefaultValueString(EnumString);
+	}
+};

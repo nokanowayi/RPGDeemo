@@ -45,6 +45,14 @@ public:
 	UFUNCTION()
 	void SetAllowBackGroundAudioVolume(const bool bToAllowBackGroundAudioVolume);
 	/** Audio Collection Tab*/
+
+	/** Video Collection Tab - 屏幕分辨率（字符串版："X = 1920 , Y = 1080"，与选项值格式一致） */
+	UFUNCTION()
+	FString GetScreenResolutionString() const;
+
+	UFUNCTION()
+	void SetScreenResolutionString(const FString& InValue);
+	/** Video Collection Tab*/
 private:
 	/** Gameplay Collection Tab*/
 	UPROPERTY(config)

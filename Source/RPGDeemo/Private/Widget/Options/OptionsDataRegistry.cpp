@@ -8,6 +8,7 @@
 #include "Widget/Options/DataObject/ListDataObject_String.h"
 #include "Widget/Options/DataObject/ListDataObject_Collection.h"
 #include "Widget/Options/DataObject/ListDataObject_Scalar.h"
+#include "Widget/Options/DataObject/ListDataObject_StringResolution.h"
 
 class UFrontendGameUserSettings;
 #define MAKE_OPTIONS_DATA_CONTROL(SetterOrGetterFuncName) \
@@ -120,7 +121,7 @@ void UOptionsDataRegistry::InitAudioCollectionTab()
 			OverAllVolume->SetDisplayName(FText::FromString(TEXT("Overall Volume")));
 			OverAllVolume->SetDescriptionRichText(FText::FromString(TEXT("Adjust The Overall Volume Of The Game.")));
 			OverAllVolume->SetDisplayValueRange(TRange<float>(0.f, 1.f));
-			OverAllVolume->SetOutPutValueRange(TRange<float>(0.f, 2.f));
+			OverAllVolume->SetOutPutValueRange(TRange<float>(0.f, 1.f));
 			OverAllVolume->SetSliderStepSize(0.01f);
 			OverAllVolume->SetDefaultValueString(LexToString(1.f));
 			OverAllVolume->SetDisplayNumericType(ECommonNumericType::Percentage);
@@ -136,13 +137,13 @@ void UOptionsDataRegistry::InitAudioCollectionTab()
 			MusicVolume->SetDisplayName(FText::FromString(TEXT("Music Volume")));
 			MusicVolume->SetDescriptionRichText(FText::FromString(TEXT("Adjust The Music Volume Of The Game.")));
 			MusicVolume->SetDisplayValueRange(TRange<float>(0.f, 1.f));
-			MusicVolume->SetOutPutValueRange(TRange<float>(0.f, 2.f));
+			MusicVolume->SetOutPutValueRange(TRange<float>(0.f, 1.f));
 			MusicVolume->SetSliderStepSize(0.01f);
 			MusicVolume->SetDefaultValueString(LexToString(1.f));
 			MusicVolume->SetDisplayNumericType(ECommonNumericType::Percentage);
 			MusicVolume->SetNumberFormattingOptions(UListDataObject_Scalar::NoDecimal());
-			MusicVolume->SetDataDynamicGetter(MAKE_OPTIONS_DATA_CONTROL(GetOverallVolume));
-			MusicVolume->SetDataDynamicSetter(MAKE_OPTIONS_DATA_CONTROL(SetOverallVolume));
+			MusicVolume->SetDataDynamicGetter(MAKE_OPTIONS_DATA_CONTROL(GetMusicVolume));
+			MusicVolume->SetDataDynamicSetter(MAKE_OPTIONS_DATA_CONTROL(SetMusicVolume));
 
 			VolumeCategoryCollection->AddChildListData(MusicVolume);
 		}
@@ -176,6 +177,41 @@ void UOptionsDataRegistry::InitVideoCollectionTab()
 	VideoCollectionData->SetDataID(FName(TEXT("VideoTabCollection")));
 	VideoCollectionData->SetDisplayName(FText::FromString(TEXT("Video")));
 
+	{
+		UListDataObject_Collection* DisplayCategoryCollection = NewObject<UListDataObject_Collection>();
+		DisplayCategoryCollection->SetDataID(FName(TEXT("DisplayCategoryCollection")));
+		DisplayCategoryCollection->SetDisplayName(FText::FromString(TEXT("Display")));
+
+		VideoCollectionData->AddChildListData(DisplayCategoryCollection);
+
+		{
+			UListDataObject_StringEnum* WindowMode = NewObject<UListDataObject_StringEnum>();
+			WindowMode->SetDataID(FName(TEXT("WindowMode")));
+			WindowMode->SetDisplayName(FText::FromString(TEXT("WindowMode")));
+			WindowMode->SetDescriptionRichText(FText::FromString(TEXT("Adjust The Window Mode Of The Game.")));
+			WindowMode->AddEnumOption(EWindowMode::Fullscreen, FText::FromString(TEXT("Fullscreen Mode")));
+			WindowMode->AddEnumOption(EWindowMode::WindowedFullscreen, FText::FromString(TEXT("Windowed Fullscreen Mode")));
+			WindowMode->AddEnumOption(EWindowMode::Windowed, FText::FromString(TEXT("Windowed Mode")));
+			WindowMode->SetDefaultValue(EWindowMode::Fullscreen);
+			WindowMode->SetDataDynamicGetter(MAKE_OPTIONS_DATA_CONTROL(GetFullscreenMode));
+			WindowMode->SetDataDynamicSetter(MAKE_OPTIONS_DATA_CONTROL(SetFullscreenMode));
+			WindowMode->SetShouldApplySettingsImmediately(true);
+			VideoCollectionData->AddChildListData(WindowMode);
+		}
+
+		{
+			UListDataObject_StringResolution* Resolution = NewObject<UListDataObject_StringResolution>();
+			Resolution->SetDataID(FName(TEXT("ScreenResolution")));
+			Resolution->SetDisplayName(FText::FromString(TEXT("Screen Resolution")));
+			Resolution->SetDescriptionRichText(FText::FromString(TEXT("Adjust The Screen Resolution Of The Game.")));
+			Resolution->InitResolutionValues();
+			Resolution->SetDataDynamicGetter(MAKE_OPTIONS_DATA_CONTROL(GetScreenResolutionString));
+			Resolution->SetDataDynamicSetter(MAKE_OPTIONS_DATA_CONTROL(SetScreenResolutionString));
+			Resolution->SetShouldApplySettingsImmediately(true);
+
+			VideoCollectionData->AddChildListData(Resolution);
+		}
+	}
 	RegisteredOptionsTabCollections.Add(VideoCollectionData);
 }
 

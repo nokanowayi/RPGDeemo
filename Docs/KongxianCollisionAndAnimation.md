@@ -326,3 +326,13 @@ UE skill：`unreal-engine-5`，辅助主题 `collision-profiles-channels`、`plu
 - 修改：该能力引用改为 GA_Hero_UnequipKanata。基础 IMC_Default 的 Two=IA_Equip_Kanata；持刀 IMC_Kanata 的 Two=IA_Unequip_Kanata。保留与现有蒙太奇通知一致的 Axe 事件标签。
 - 验证：两个武器蓝图在 Editor 编译并保存。PIE 未装备和持斧状态分别施加世界 X 正方向移动，8次采样中 Y=-500、Z=97.649999 均保持不变。模拟实际 Two 按键，首次太刀挂 AxeRighthandSocket，再次挂 AxeBackSocket；角色位置始终(-450,-500,97.649999)。本轮日志未检出 Accessed None / Script Exception。
 - 限制：仅资产修改，未运行 UBT 或 Automation Test；尚未覆盖多人、坡面、连续战斗中断与各方向组合输入。
+
+## 2026-11-08 当前 KongxianAI 模型尾巴摆动与飘带材质
+
+当前 MainMenuMap 展示模型为 /Game/Assets/KongxianAI/Kongxian_UE5_final，区别于旧版 RetargetReady，原先没有 PostProcess AnimBlueprint。新建 A_Kongxian_TailRibbon_Sway 和 ABP_Kongxian_TailRibbon_Post，针对当前骨架参考姿态生成 tail_2..tail_13 与 handbelt0..11 的6秒局部叠加循环，后续骨骼相位递减。尾巴根部7度、后续节2.8度横摆并附带较小俯仰。通过后处理播放，保留输入动作。
+
+当前新模型后处理的 RigidBody Alpha=0；仅提供循环动画，未新增尾巴物理或碰撞。两份模型的部分身体参考骨位置有差异，未直接套用旧版物理资产。
+
+当前模型材质槽2原为单面，创建 M_Ribbon_TwoSided（复制其原材质保留贴图）并开启TwoSided后重新赋值。旧版RetargetReady槽2也恢复既有双面材质。缺失几何是否全部恢复仍需视觉确认，不能仅凭材质设置排除权重、透明度、LOD等问题。
+
+验证：新后处理在Editor编译保存；MainMenuMap PIE连续12次尾端位置采样有变化，确认摆动正在运行。未运行UBT/Automation Test。脚本位于 E:/REA/blender-mcp/apply_current_tail.py；旧版动画与网格备份位于 Saved/TailRibbonBackup_20261108_123655。当前模型既有骨骼/蒙皮未改动。

@@ -18,7 +18,7 @@ public class RPGDeemo : ModuleRules
 			"MotionWarping", "Niagara", 
 			"NavigationSystem","MoviePlayer", "CommonUI",
 			"CommonInput",
-			"PropertyPath"
+			"PropertyPath","OnlineSubsystemSteam","OnlineSubsystem",
 		});
 
 		// 仅在非 Shipping 构建中启用 GameplayDebugger

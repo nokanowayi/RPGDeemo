@@ -7,6 +7,7 @@
 #include "AbilitySystem/Abilities/WarriorGameplayAbility.h"
 #include "MotionWarpingComponent.h"
 #include "TimerManager.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -152,6 +153,25 @@ bool AWarriorBaseCharacter::TryActivateOnGivenAbilities()
 		}
 	}
 	return bFound;
+}
+
+void AWarriorBaseCharacter::OpenLobby()
+{
+	UWorld* World = GEngine->GetWorld();
+	if (!World) return;
+	World->ServerTravel(TEXT("/Game/Maps/Lobby?listen"));
+}
+
+void AWarriorBaseCharacter::CallOpenLevel(const FString& LevelName)
+{
+	UGameplayStatics::OpenLevel(this, *LevelName, true);
+}
+
+void AWarriorBaseCharacter::CallClientTravel(const FString& LevelName)
+{
+	APlayerController* PlayerController = GetGameInstance()->GetFirstLocalPlayerController();
+	if (!PlayerController) return;
+	PlayerController->ClientTravel(LevelName, ETravelType::TRAVEL_Absolute);
 }
 
 

@@ -64,11 +64,14 @@ private:
 	void Input_AbilityInputReleased(FGameplayTag InInputTag);
 #pragma endregion
 
+
 public:
 	FORCEINLINE UDataAsset_InputConfig* GetInputConfig() const { return InputConfig; }
 	FORCEINLINE UHeroCombatComponent* GetHeroCombatComponent() const { return HeroCombatComponent; }
 	virtual UPawnUIComponent* GetPawnUIComponent() const override;
 	virtual UHeroUIComponent* GetHeroUIComponent() const override;
 	virtual UWarriorLevelComponent* GetWarriorLevelComponent() const override;
+	
+
 };
 

@@ -113,15 +113,25 @@ void AWarriorHeroCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 
 void AWarriorHeroCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
-	checkf(InputConfig, TEXT("InputConfig is null, please assign InputConfig in BP"));
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	ULocalPlayer* LocalPlayer = GetController<APlayerController>()->GetLocalPlayer();
-	UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
-	check(Subsystem);
+	if (!InputConfig || !InputConfig->DefautMappingContext)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Input setup skipped for %s (class %s): assign InputConfig and its mapping context in the pawn Blueprint defaults; check the GameMode DefaultPawnClass."),
+			*GetPathName(), *GetClass()->GetPathName());
+		return;
+	}
+	APlayerController* PlayerController = GetController<APlayerController>();
+	ULocalPlayer* LocalPlayer = PlayerController ? PlayerController->GetLocalPlayer() : nullptr;
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer ? LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>() : nullptr;
+	UWarrriorInputComponent* WarriorInputComponent = Cast<UWarrriorInputComponent>(PlayerInputComponent);
+	if (!Subsystem || !WarriorInputComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Input setup skipped for %s: missing local Enhanced Input subsystem or UWarrriorInputComponent."), *GetPathName());
+		return;
+	}
 
 	Subsystem->AddMappingContext(InputConfig->DefautMappingContext, 0);
 
-	UWarrriorInputComponent* WarriorInputComponent = CastChecked<UWarrriorInputComponent>(PlayerInputComponent);
 	WarriorInputComponent->BindNativeInputAction(InputConfig, WarriorGameplayTags::InputTag_Move, ETriggerEvent::Triggered,this, &AWarriorHeroCharacter::Input_Move);
 	WarriorInputComponent->BindNativeInputAction(InputConfig, WarriorGameplayTags::InputTag_Look, ETriggerEvent::Triggered,this, &AWarriorHeroCharacter::Input_Look);
 	WarriorInputComponent->BindNativeInputAction(InputConfig, WarriorGameplayTags::InputTag_SwitchTarget, ETriggerEvent::Triggered,this, &AWarriorHeroCharacter::Input_SwitchTargetTriggered);

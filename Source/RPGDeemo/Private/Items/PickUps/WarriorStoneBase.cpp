@@ -19,6 +19,6 @@ void AWarriorStoneBase::OnPickUpCollisionSphereBeginOverlap(UPrimitiveComponent*
 {
 	if (AWarriorHeroCharacter* WarriorHeroCharacter = Cast<AWarriorHeroCharacter>(OtherActor))
 	{
-		WarriorHeroCharacter->GetWarriorAbilitySystemComponent()->TryActivateAbilityByTag(WarriorGameplayTags::Player_Ability_Contact_Stones);
+		WarriorHeroCharacter->GetWarriorAbilitySystemComponent()->TryActivateAbilityByTag(WarriorGameplayTags::Player_Ability_Interact);
 	}
 }

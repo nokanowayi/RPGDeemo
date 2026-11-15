@@ -3,31 +3,65 @@
 
 #include "Subsystems/WarriorSessionSubsystem.h"
 
-#include "GameplayDebuggerLocalController.h"
 #include "OnlineSessionSettings.h"
 #include "Online/OnlineSessionNames.h"
 #include "OnlineSubsystem.h"
+#include "OnlineSubsystemUtils.h"
+#include "Engine/GameInstance.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
+#include "GameFramework/PlayerController.h"
 #include "WarriorDebugHelper.h"
 
 UWarriorSessionSubsystem::UWarriorSessionSubsystem():
     OnCreateSessionCompleteDelegate(FOnCreateSessionCompleteDelegate::CreateUObject(this, &UWarriorSessionSubsystem::OnCreateGameSessionComplete)),
-    OnJoinSessionCompleteDelegate(FOnJoinSessionCompleteDelegate::CreateUObject(this, &UWarriorSessionSubsystem::OnJoinGameSessionComplete)),
     OnFindSessionsCompleteDelegate(FOnFindSessionsCompleteDelegate::CreateUObject(this, &UWarriorSessionSubsystem::OnFindGameSessionComplete)),
+    OnJoinSessionCompleteDelegate(FOnJoinSessionCompleteDelegate::CreateUObject(this, &UWarriorSessionSubsystem::OnJoinGameSessionComplete)),
 	OnDestroySessionCompleteDelegate(FOnDestroySessionCompleteDelegate::CreateUObject(this, &UWarriorSessionSubsystem::OnDestroyGameSessionComplete)),
 	OnStartSessionCompleteDelegate(FOnStartSessionCompleteDelegate::CreateUObject(this, &UWarriorSessionSubsystem::OnStartGameSessionComplete))
 {
-	IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
-	if (OnlineSubsystem)
+}
+
+bool UWarriorSessionSubsystem::ResolveSessionInterface()
+{
+	// Keep pending delegates attached to the interface which owns their requests.
+	if (!OnCreateSessionCompleteDelegateHandle.IsValid()
+		&& !OnFindSessionsCompleteDelegateHandle.IsValid()
+		&& !OnJoinSessionCompleteDelegateHandle.IsValid()
+		&& !OnDestroySessionCompleteDelegateHandle.IsValid())
 	{
-		OnlineSessionInterface = OnlineSubsystem->GetSessionInterface();
+		OnlineSessionInterface = GetWorld() ? Online::GetSessionInterface(GetWorld()) : nullptr;
 	}
+	return OnlineSessionInterface.IsValid();
+}
+
+void UWarriorSessionSubsystem::Deinitialize()
+{
+	if (OnlineSessionInterface.IsValid())
+	{
+		OnlineSessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(OnCreateSessionCompleteDelegateHandle);
+		OnlineSessionInterface->ClearOnFindSessionsCompleteDelegate_Handle(OnFindSessionsCompleteDelegateHandle);
+		OnlineSessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(OnJoinSessionCompleteDelegateHandle);
+		OnlineSessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(OnDestroySessionCompleteDelegateHandle);
+		OnlineSessionInterface->ClearOnStartSessionCompleteDelegate_Handle(OnStartSessionCompleteDelegateHandle);
+	}
+	OnCreateSessionCompleteDelegateHandle.Reset();
+	OnFindSessionsCompleteDelegateHandle.Reset();
+	OnJoinSessionCompleteDelegateHandle.Reset();
+	OnDestroySessionCompleteDelegateHandle.Reset();
+	OnStartSessionCompleteDelegateHandle.Reset();
+	OnlineSessionInterface.Reset();
+	Super::Deinitialize();
 }
 
 void UWarriorSessionSubsystem::CreateSession(int32 Num,FString SessionName)
 {
-	if (!OnlineSessionInterface.IsValid())
+	if (OnCreateSessionCompleteDelegateHandle.IsValid() || OnDestroySessionCompleteDelegateHandle.IsValid())
+	{
+		OnMultiplayCreateSessionCompleteDelegate.Broadcast(false);
+		return;
+	}
+	if (!ResolveSessionInterface())
 	{
 		UE_LOG(LogTemp, Error, TEXT("CreateSession: OnlineSessionInterface is unavailable."));
 		return;
@@ -38,15 +72,16 @@ void UWarriorSessionSubsystem::CreateSession(int32 Num,FString SessionName)
 	if (ExistingSession!=nullptr)
 	{
 		bCreateSessionOnDestroy = true;
-		LastNumPublicConnections = NumConnected;
-		LastMatchType = MatchType;
+		LastNumPublicConnections = Num;
+		LastMatchType = SessionName;
 		
 		DestroySession();
+		return;
 	}
 
 	const ULocalPlayer* LocalPlayer = GetGameInstance()->GetFirstGamePlayer();
 	LastSessionSettings = MakeShared<FOnlineSessionSettings>();
-	LastSessionSettings->bIsLANMatch = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL" ? true : false;
+	LastSessionSettings->bIsLANMatch = Online::GetSubsystem(GetWorld())->GetSubsystemName() == "NULL";
 	LastSessionSettings->NumPublicConnections = Num;
 	LastSessionSettings->bShouldAdvertise = true;
 	LastSessionSettings->bUseLobbiesIfAvailable = !LastSessionSettings->bIsLANMatch;
@@ -57,7 +92,8 @@ void UWarriorSessionSubsystem::CreateSession(int32 Num,FString SessionName)
 	LastSessionSettings->BuildUniqueId = 1;
 
 	OnCreateSessionCompleteDelegateHandle = OnlineSessionInterface->AddOnCreateSessionCompleteDelegate_Handle(OnCreateSessionCompleteDelegate);
-	if (!OnlineSessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *LastSessionSettings))
+	if (!LocalPlayer || !LocalPlayer->GetPreferredUniqueNetId().IsValid()
+		|| !OnlineSessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *LastSessionSettings))
 	{
 		OnlineSessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(OnCreateSessionCompleteDelegateHandle);
 		OnCreateSessionCompleteDelegateHandle.Reset();
@@ -68,12 +104,12 @@ void UWarriorSessionSubsystem::CreateSession(int32 Num,FString SessionName)
 
 void UWarriorSessionSubsystem::FindSession(int32 MaxSearchResult)
 {
-	if (!OnlineSessionInterface.IsValid())
+	if (!ResolveSessionInterface())
 	{
 		UE_LOG(LogTemp, Error, TEXT("FindSession: OnlineSessionInterface is unavailable."));
 		return;
 	}
-	if (MaxSearchResult <= 0 || OnFindSessionsCompleteDelegateHandle.IsValid())
+	if (MaxSearchResult <= 0 || OnFindSessionsCompleteDelegateHandle.IsValid() || OnDestroySessionCompleteDelegateHandle.IsValid())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("FindSession: invalid max search result or request already pending."));
 		return;
@@ -81,7 +117,7 @@ void UWarriorSessionSubsystem::FindSession(int32 MaxSearchResult)
 
 	LastSessionSearch = MakeShared<FOnlineSessionSearch>();
 	LastSessionSearch->MaxSearchResults = MaxSearchResult;
-	LastSessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL" ? true : false;
+	LastSessionSearch->bIsLanQuery = Online::GetSubsystem(GetWorld())->GetSubsystemName() == "NULL";
 	if (!LastSessionSearch->bIsLanQuery)
 	{
 		LastSessionSearch->QuerySettings.Set(SEARCH_LOBBIES, true, EOnlineComparisonOp::Equals);
@@ -105,7 +141,7 @@ void UWarriorSessionSubsystem::JoinSession_ByBluePrint(int32 Count)
 
 void UWarriorSessionSubsystem::JoinSession(const FOnlineSessionSearchResult& SearchResult)
 {
-	if (!OnlineSessionInterface.IsValid())
+	if (!ResolveSessionInterface() || OnJoinSessionCompleteDelegateHandle.IsValid() || OnDestroySessionCompleteDelegateHandle.IsValid())
 	{
 		OnMultiplayJoinSessionCompleteDelegate.Broadcast(EOnJoinSessionCompleteResult::UnknownError);
 		UE_LOG(LogTemp, Error, TEXT("JoinSession: OnlineSessionInterface is unavailable."));
@@ -113,7 +149,8 @@ void UWarriorSessionSubsystem::JoinSession(const FOnlineSessionSearchResult& Sea
 	}
 	OnJoinSessionCompleteDelegateHandle = OnlineSessionInterface->AddOnJoinSessionCompleteDelegate_Handle(OnJoinSessionCompleteDelegate);
 	const ULocalPlayer* LocalPlayer = GetGameInstance()->GetFirstGamePlayer();
-	if (!OnlineSessionInterface->JoinSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, SearchResult))
+	if (!LocalPlayer || !LocalPlayer->GetPreferredUniqueNetId().IsValid()
+		|| !OnlineSessionInterface->JoinSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, SearchResult))
 	{
 		OnlineSessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(OnJoinSessionCompleteDelegateHandle);
 		OnJoinSessionCompleteDelegateHandle.Reset();
@@ -124,10 +161,19 @@ void UWarriorSessionSubsystem::JoinSession(const FOnlineSessionSearchResult& Sea
 
 void UWarriorSessionSubsystem::DestroySession()
 {
-	if (!OnlineSessionInterface.IsValid())
+	if (OnDestroySessionCompleteDelegateHandle.IsValid())
+	{
+		return;
+	}
+	if (!ResolveSessionInterface())
 	{
 		UE_LOG(LogTemp, Error, TEXT("DestroySession: OnlineSessionInterface is unavailable."));
-		OnMultiplayDestroySessionCompleteDelegate.Broadcast(false);
+		OnDestroyGameSessionComplete(NAME_GameSession, false);
+		return;
+	}
+	if (!OnlineSessionInterface->GetNamedSession(NAME_GameSession))
+	{
+		OnDestroyGameSessionComplete(NAME_GameSession, true);
 		return;
 	}
 
@@ -135,9 +181,17 @@ void UWarriorSessionSubsystem::DestroySession()
 	
 	if (!OnlineSessionInterface->DestroySession(NAME_GameSession))
 	{
-		OnlineSessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(OnDestroySessionCompleteDelegateHandle);
-		OnMultiplayDestroySessionCompleteDelegate.Broadcast(false);
+		OnDestroyGameSessionComplete(NAME_GameSession, false);
 	}
+}
+
+void UWarriorSessionSubsystem::LeaveSession()
+{
+	// Explicitly leaving must never activate the recreate-session branch.
+	bCreateSessionOnDestroy = false;
+	LastNumPublicConnections = 0;
+	LastMatchType.Reset();
+	DestroySession();
 }
 
 void UWarriorSessionSubsystem::StartSession()
@@ -182,6 +236,12 @@ void UWarriorSessionSubsystem::OnFindGameSessionComplete(bool bWasSuccessful)
 	{
 		OnlineSessionInterface->ClearOnFindSessionsCompleteDelegate_Handle(OnFindSessionsCompleteDelegateHandle);
 	}
+	OnFindSessionsCompleteDelegateHandle.Reset();
+	if (!LastSessionSearch.IsValid())
+	{
+		OnMultiplayFindSessionsCompleteDelegate.Broadcast(TArray<FOnlineSessionSearchResult>(), false);
+		return;
+	}
 
 	if (LastSessionSearch->SearchResults.Num() <=0)
 	{
@@ -209,26 +269,25 @@ void UWarriorSessionSubsystem::OnFindGameSessionComplete(bool bWasSuccessful)
 
 void UWarriorSessionSubsystem::OnJoinGameSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
 {
+	if (SessionName != NAME_GameSession)
+	{
+		return;
+	}
 	if (OnlineSessionInterface)
 	{
 		OnlineSessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(OnJoinSessionCompleteDelegateHandle);
 	}
+	OnJoinSessionCompleteDelegateHandle.Reset();
 
 	OnMultiplayJoinSessionCompleteDelegate.Broadcast(Result);
 
-	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
-	if (OnlineSub)
+	if (Result == EOnJoinSessionCompleteResult::Success && OnlineSessionInterface.IsValid())
 	{
-		IOnlineSessionPtr SessionInterface = OnlineSub->GetSessionInterface();
-		if (SessionInterface)
+		FString Address;
+		APlayerController* PlayerController = GetGameInstance()->GetFirstLocalPlayerController();
+		if (PlayerController && OnlineSessionInterface->GetResolvedConnectString(NAME_GameSession, Address) && !Address.IsEmpty())
 		{
-			FString Address;
-			SessionInterface->GetResolvedConnectString(NAME_GameSession, Address);
-			APlayerController* PlayerController = GetGameInstance()->GetFirstLocalPlayerController();
-			if (PlayerController)
-			{
-				PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
-			}
+			PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
 		}
 	}
 	
@@ -236,13 +295,19 @@ void UWarriorSessionSubsystem::OnJoinGameSessionComplete(FName SessionName, EOnJ
 
 void UWarriorSessionSubsystem::OnDestroyGameSessionComplete(FName SessionName, bool bWasSuccessful)
 {
+	if (SessionName != NAME_GameSession)
+	{
+		return;
+	}
 	if (OnlineSessionInterface)
 	{
 		OnlineSessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(OnDestroySessionCompleteDelegateHandle);
 	}
-	if (bWasSuccessful && bCreateSessionOnDestroy)
+	OnDestroySessionCompleteDelegateHandle.Reset();
+	const bool bRecreateSession = bWasSuccessful && bCreateSessionOnDestroy;
+	bCreateSessionOnDestroy = false;
+	if (bRecreateSession)
 	{
-		bCreateSessionOnDestroy = false;
 		CreateSession(LastNumPublicConnections, LastMatchType);
 	}
 	OnMultiplayDestroySessionCompleteDelegate.Broadcast(bWasSuccessful);

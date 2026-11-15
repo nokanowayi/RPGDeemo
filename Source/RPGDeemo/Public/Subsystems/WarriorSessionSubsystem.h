@@ -24,6 +24,7 @@ class RPGDEEMO_API UWarriorSessionSubsystem : public UGameInstanceSubsystem
 public:
 
 	UWarriorSessionSubsystem();
+	virtual void Deinitialize() override;
 	
 	UFUNCTION(blueprintCallable)
 	void CreateSession(int32 Num,FString SessionName);
@@ -37,6 +38,7 @@ public:
 	void JoinSession(const FOnlineSessionSearchResult& SearchResult);
 
 	void DestroySession();
+	void LeaveSession();
 
 	void StartSession();
 
@@ -75,4 +77,7 @@ protected:
 	bool bCreateSessionOnDestroy{false};
 	int32 LastNumPublicConnections{4};
 	FString LastMatchType;
+
+private:
+	bool ResolveSessionInterface();
 };

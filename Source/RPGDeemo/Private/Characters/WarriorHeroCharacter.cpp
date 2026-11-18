@@ -111,6 +111,11 @@ void AWarriorHeroCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	
 }
 
+void AWarriorHeroCharacter::SetBIsPreInputWindow(bool bInIsPreInputWindow)
+{
+	bIsPreInputWindow = bInIsPreInputWindow;
+}
+
 void AWarriorHeroCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -138,7 +143,7 @@ void AWarriorHeroCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 	WarriorInputComponent->BindNativeInputAction(InputConfig, WarriorGameplayTags::InputTag_SwitchTarget, ETriggerEvent::Completed,this, &AWarriorHeroCharacter::Input_SwitchTargetCompleted);
 	WarriorInputComponent->BindNativeInputAction(InputConfig, WarriorGameplayTags::InputTag_Interact, ETriggerEvent::Started,this, &AWarriorHeroCharacter::Input_InteractStarted);
 	
-	WarriorInputComponent->BindAbilityInputAction(InputConfig, this, &AWarriorHeroCharacter::Input_AbilityInputPressed, &AWarriorHeroCharacter::Input_AbilityInputReleased);
+	WarriorInputComponent->BindAbilityInputAction(InputConfig, this, &AWarriorHeroCharacter::Input_AbilityInputPressed, &AWarriorHeroCharacter::Input_AbilityInputReleased,&AWarriorHeroCharacter::Input_AttackInputPressed);
 }
 
 void AWarriorHeroCharacter::BeginPlay()
@@ -207,6 +212,21 @@ void AWarriorHeroCharacter::Input_AbilityInputPressed(FGameplayTag InInputTag)
 void AWarriorHeroCharacter::Input_AbilityInputReleased(FGameplayTag InInputTag)
 {
 	WarriorAbilitySystemComponent->OnAbilityInputReleased(InInputTag);
+}
+
+void AWarriorHeroCharacter::Input_AttackInputPressed(FGameplayTag InInputTag)
+{
+	if (GetBIsPreInputWindow())
+	{
+		SetPreInputTag(InInputTag);
+	}
+
+	if (InInputTag.MatchesTagExact(WarriorGameplayTags::InputTag_Roll))
+	{
+		SetBIsPreInputWindow(false);
+	}
+
+	Input_AbilityInputPressed(InInputTag);
 }
 
 

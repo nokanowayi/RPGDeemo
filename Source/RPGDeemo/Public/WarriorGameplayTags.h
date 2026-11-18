@@ -13,7 +13,9 @@ namespace WarriorGameplayTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Unequip_Axe);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Unequip_Kanata);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_LightAttack_Axe);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_LightAttack_Kanata);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_HeavyAttack_Axe);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_HeavyAttack_Kanata);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_Roll);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_SwitchTarget);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(InputTag_SpecialWeaponAbility_Light);
@@ -72,6 +74,13 @@ namespace WarriorGameplayTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Status_Rage_Full);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Status_Rage_None);
 
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Combo_Window);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Combo_L);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Combo_R);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Combo_LL);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Combo_LR);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Combo_RR);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Combo_LLR);
 	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_SetByCaller_AttackType_Light);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_SetByCaller_AttackType_Heavy);

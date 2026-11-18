@@ -11,7 +11,9 @@ namespace WarriorGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_Unequip_Axe, "InputTag.Unequip.Axe");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_Unequip_Kanata, "InputTag.Unequip.Kanata");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_LightAttack_Axe, "InputTag.LightAttack.Axe");
+	UE_DEFINE_GAMEPLAY_TAG(InputTag_LightAttack_Kanata, "InputTag.LightAttack.Kanata");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_HeavyAttack_Axe, "InputTag.HeavyAttack.Axe");
+	UE_DEFINE_GAMEPLAY_TAG(InputTag_HeavyAttack_Kanata, "InputTag.HeavyAttack.Kanata");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_Roll, "InputTag.Roll");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_SwitchTarget, "InputTag.SwitchTarget");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_SpecialWeaponAbility_Light, "InputTag.SpecialWeaponAbility.Light");
@@ -64,6 +66,15 @@ namespace WarriorGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Player_Status_Rage_Full,"Player.Status.Rage.Full");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Status_Rage_None,"Player.Status.Rage.None");
 
+	UE_DEFINE_GAMEPLAY_TAG(Player_Combo_Window,"Player.Combo.Window");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Combo_L,"Player.Combo.L");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Combo_R,"Player.Combo.R");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Combo_LL,"Player.Combo.LL");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Combo_LR,"Player.Combo.LR");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Combo_RR,"Player.Combo.RR");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Combo_LRR,"Player.Combo.LRR");
+	
+	
 	UE_DEFINE_GAMEPLAY_TAG(Player_SetByCaller_AttackType_Light,"Player.SetByCaller.AttackType.Light");
 	UE_DEFINE_GAMEPLAY_TAG(Player_SetByCaller_AttackType_Heavy,"Player.SetByCaller.AttackType.Heavy");
 

@@ -1,0 +1,17 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0",
+  "FriendlyName": "GASP Retarget Tools",
+  "Description": "Editor-only helpers for inspecting retargeted animations and adapting GASP montage slots.",
+  "Category": "Animation",
+  "CanContainContent": false,
+  "EnabledByDefault": false,
+  "Modules": [
+    {
+      "Name": "GASPRetargetTools",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    }
+  ]
+}

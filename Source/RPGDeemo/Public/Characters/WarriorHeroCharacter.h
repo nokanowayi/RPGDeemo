@@ -25,6 +25,20 @@ public:
 	AWarriorHeroCharacter();
 	virtual  UPawnCombatComponent* GetPawnCombatComponent() const override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION(BlueprintCallable,Category="Warrior|Hero")
+	void SetBIsPreInputWindow(bool bInIsPreInputWindow);
+
+	UFUNCTION(BlueprintCallable,Category="Warrior|Hero")
+	FORCEINLINE bool GetBIsPreInputWindow(){ return bIsPreInputWindow; };
+
+
+	UFUNCTION(BlueprintCallable,Category="Warrior|Hero")
+	FORCEINLINE FGameplayTag GetPreInputTag(){return PreInputTag;};
+
+	UFUNCTION(BlueprintCallable,Category="Warrior|Hero")
+	FORCEINLINE void SetPreInputTag(FGameplayTag InPreInputTag){PreInputTag = InPreInputTag;};
+
 protected:
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -52,6 +66,12 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "CharacterData",meta = (AllowPrivateAccess = "true"))
 	UDataAsset_InputConfig* InputConfig;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "CharacterInput",meta = (AllowPrivateAccess = "true"))
+	FGameplayTag PreInputTag;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "CharacterInput",meta = (AllowPrivateAccess = "true"))
+	bool bIsPreInputWindow = false;
+	
 	void Input_Move(const FInputActionValue& InputActionValue);
 	void Input_Look(const FInputActionValue& InputActionValue);
 	void Input_SwitchTargetTriggered(const FInputActionValue& InputActionValue);
@@ -62,6 +82,8 @@ private:
 	
 	void Input_AbilityInputPressed(FGameplayTag InInputTag);
 	void Input_AbilityInputReleased(FGameplayTag InInputTag);
+	void Input_AttackInputPressed(FGameplayTag InInputTag);
+	
 #pragma endregion
 
 

@@ -2,6 +2,8 @@
 
 
 #include "AbilitySystem/WarriorAttributeSet.h"
+
+#include "AbilitySystemBlueprintLibrary.h"
 #include "GameplayEffectExtension.h"
 #include "Net/UnrealNetwork.h"
 #include "WarriorDebugHelper.h"
@@ -20,6 +22,8 @@ UWarriorAttributeSet::UWarriorAttributeSet()
 	InitDefensePower(1.f);
 	InitCharacterLevel(1.f);
 	InitCurrentExp(0.f);
+	InitMaxPosture(1.f);
+	InitCurrentPosture(1.f);
 }
 
 void UWarriorAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -32,6 +36,8 @@ void UWarriorAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	DOREPLIFETIME_CONDITION_NOTIFY(UWarriorAttributeSet, MaxRage, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UWarriorAttributeSet, CharacterLevel, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UWarriorAttributeSet, CurrentExp, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UWarriorAttributeSet, MaxPosture, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UWarriorAttributeSet, CurrentPosture, COND_None, REPNOTIFY_Always);
 }
 
 void UWarriorAttributeSet::OnRep_CurrentHealth(const FGameplayAttributeData& OldCurrentHealth)
@@ -69,6 +75,18 @@ void UWarriorAttributeSet::OnRep_CurrentExp(const FGameplayAttributeData& OldCur
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UWarriorAttributeSet, CurrentExp, OldCurrentExp);
 	BroadcastExpChanged();
+}
+
+void UWarriorAttributeSet::OnRep_MaxPosture(const FGameplayAttributeData& OldMaxPosture)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UWarriorAttributeSet, MaxPosture, OldMaxPosture);
+	BroadcastPostureChanged();
+}
+
+void UWarriorAttributeSet::OnRep_CurrentPosture(const FGameplayAttributeData& OldCurrentPosture)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UWarriorAttributeSet, CurrentPosture, OldCurrentPosture);
+	BroadcastPostureChanged();
 }
 
 void UWarriorAttributeSet::BroadcastHealthChanged() const
@@ -150,6 +168,35 @@ void UWarriorAttributeSet::BroadcastLevelChanged() const
 	}
 }
 
+void UWarriorAttributeSet::BroadcastPostureChanged() const
+{
+	AActor* AvatarActor = GetOwningActor();
+	if (!AvatarActor)
+	{
+		return;
+	}
+
+	IPawnUIInterface* PawnUIInterface = CachedPawnUIInterface.IsValid() ?
+		CachedPawnUIInterface.Get() : Cast<IPawnUIInterface>(AvatarActor);
+
+	if (PawnUIInterface)
+	{
+		if (UPawnUIComponent* PawnUIComponent = PawnUIInterface->GetPawnUIComponent())
+		{
+			const float MaxPostureValue = GetMaxPosture();
+			const float Percent = MaxPostureValue > 0.f
+				? FMath::Clamp(GetCurrentPosture() / MaxPostureValue, 0.f, 1.f)
+				: 1.f;
+			PawnUIComponent->OnCurrentPostureChanged.Broadcast(Percent);
+		}
+
+		if (UHeroUIComponent* HeroUIComponent = PawnUIInterface->GetHeroUIComponent())
+		{
+			HeroUIComponent->OnPostureChangeDelegate.Broadcast(static_cast<int32>(GetCurrentPosture()));
+		}
+	}
+}
+
 
 void UWarriorAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data)
 {
@@ -158,7 +205,46 @@ void UWarriorAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffec
 		CachedPawnUIInterface = TWeakInterfacePtr<IPawnUIInterface>(Data.Target.GetAvatarActor());
 	}
 
+	const FGameplayEffectContextHandle& Context =
+	Data.EffectSpec.GetContext();
+
+	AActor* Attacker = Context.GetOriginalInstigator();
+
 	UPawnUIComponent* PawnUIComponent = CachedPawnUIInterface.IsValid() ? CachedPawnUIInterface->GetPawnUIComponent() : nullptr;
+
+	if (Data.EvaluatedData.Attribute == GetMaxPostureAttribute())
+	{
+		const float NewMaxPosture = FMath::Max(1.f, GetMaxPosture());
+		SetMaxPosture(NewMaxPosture);
+
+		const float CurrentPostureValue = GetCurrentPosture();
+		if (FMath::IsNearlyEqual(CurrentPostureValue, 1.f) && NewMaxPosture > 1.f)
+		{
+			SetCurrentPosture(NewMaxPosture);
+		}
+		else
+		{
+			SetCurrentPosture(FMath::Clamp(CurrentPostureValue, 0.f, NewMaxPosture));
+		}
+
+		BroadcastPostureChanged();
+	}
+
+	if (Data.EvaluatedData.Attribute == GetCurrentPostureAttribute())
+	{
+		SetCurrentPosture(FMath::Clamp(GetCurrentPosture(), 0.f, GetMaxPosture()));
+		BroadcastPostureChanged();
+		if (GetCurrentPosture() <= 0.f)
+		{
+			FGameplayEventData EventData;
+			EventData.EventTag = WarriorGameplayTags::Enemy_Event_PostureBroken;
+			EventData.Instigator = Attacker;
+			EventData.Target = Data.Target.GetAvatarActor();
+			EventData.ContextHandle = Context;
+
+			UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Data.Target.GetAvatarActor(),EventData.EventTag,EventData);
+		}
+	}
 	
 	if (Data.EvaluatedData.Attribute == GetMaxHealthAttribute())
 	{

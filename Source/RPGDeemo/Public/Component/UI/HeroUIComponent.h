@@ -12,6 +12,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAbilityIconSlotUpdatedDelegate,F
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnAbilityCooldownBeginDelegate,FGameplayTag,AbilityInputTag,float,TotalCooldownTime,float,RemainingCooldownTime);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIntercatDelegate,bool,bShouldDisplayInputKey);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelUpDelegate,int,NewLevel);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPostureChangeDelegate,int,NewLevel);
 
 /**
  * 
@@ -35,6 +36,9 @@ public:
 	
 	UPROPERTY(BlueprintCallable,BlueprintAssignable)
 	FOnLevelUpDelegate OnLevelUpDelegate;
+
+	UPROPERTY(BlueprintCallable,BlueprintAssignable)
+	FOnPostureChangeDelegate OnPostureChangeDelegate;
 
 	UPROPERTY(BlueprintCallable,BlueprintAssignable)
 	FOnIntercatDelegate OnInteract;

@@ -196,12 +196,16 @@ void AWarriorHeroCharacter::Input_SwitchTargetCompleted(const FInputActionValue&
 
 void AWarriorHeroCharacter::Input_InteractStarted(const FInputActionValue& InputActionValue)
 {
+	ServerRequestInteract();
+}
+
+void AWarriorHeroCharacter::ServerRequestInteract_Implementation()
+{
 	FGameplayEventData Data;
+	Data.Instigator = this;
 	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this,
 		WarriorGameplayTags::Player_Event_ConsumeStone,
 		 Data);
-
-	//todo:改成交互而不是单独的石头
 }
 
 void AWarriorHeroCharacter::Input_AbilityInputPressed(FGameplayTag InInputTag)

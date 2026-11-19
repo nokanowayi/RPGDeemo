@@ -73,7 +73,9 @@ namespace WarriorGameplayTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Status_Rage_Active);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Status_Rage_Full);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Status_Rage_None);
-
+	
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Special_CombatArt);
+	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Combo_Window);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Combo_L);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Combo_R);
@@ -81,6 +83,7 @@ namespace WarriorGameplayTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Combo_LR);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Combo_RR);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Combo_LLR);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Combo_ArtCombat);
 	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_SetByCaller_AttackType_Light);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_SetByCaller_AttackType_Heavy);
@@ -90,10 +93,12 @@ namespace WarriorGameplayTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Ability_Ranged);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Ability_SummonEnemies);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Ability_SpawnStone);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Ability_BrokenPosture);
 	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Weapon);
 	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Event_SummonEnemies);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Event_PostureBroken);
 	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Status_Strafing);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Status_UnderAttack);
@@ -122,6 +127,7 @@ namespace WarriorGameplayTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Shared_Event_SpawnProjectile);
 
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Shared_SetByCaller_BaseDamage);
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Shared_SetByCaller_Posture);
 	
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Shared_Status_Dead);
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(Shared_Status_HitReact_Front);

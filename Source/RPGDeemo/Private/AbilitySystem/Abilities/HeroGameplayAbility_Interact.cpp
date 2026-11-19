@@ -92,12 +92,19 @@ void UHeroGameplayAbility_Interact::CollectStones()
 
 void UHeroGameplayAbility_Interact::ConsumeStones()
 {
-	if (CollectedStones.IsEmpty())
+	if (!GetCurrentActorInfo() || !GetCurrentActorInfo()->IsNetAuthority())
 	{
 		return;
 	}
-
-	for (AWarriorStoneBase* Stone : CollectedStones)
+	
+	CollectStones();
+	if (!IsActive() || CollectedStones.IsEmpty())
+	{
+		return;
+	}
+	
+	const TArray<AWarriorStoneBase*> StonesToConsume = CollectedStones;
+	for (AWarriorStoneBase* Stone : StonesToConsume)
 	{
 		if (IsValid(Stone))
 		{

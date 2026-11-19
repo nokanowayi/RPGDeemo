@@ -8,9 +8,33 @@
 
 void AWarriorStoneBase::Consume(UWarriorAbilitySystemComponent* AbilitySystemComponent, int32 ApplyLevel)
 {
-	check(StoneGameplayEffect);
-	AbilitySystemComponent->ApplyGameplayEffectToSelf(StoneGameplayEffect.GetDefaultObject(), ApplyLevel, AbilitySystemComponent->MakeEffectContext());
+	if (!HasAuthority() || bConsumed || !IsValid(AbilitySystemComponent) || !StoneGameplayEffect)
+	{
+		return;
+	}
+
+	const AActor* Recipient = AbilitySystemComponent->GetOwnerActor();
+	if (!IsValid(Recipient) || !Recipient->HasAuthority())
+	{
+		return;
+	}
+
+	// Claim before applying the effect so overlapping requests cannot consume it twice.
+	bConsumed = true;
+	const FActiveGameplayEffectHandle EffectHandle = AbilitySystemComponent->ApplyGameplayEffectToSelf(
+		StoneGameplayEffect.GetDefaultObject(), ApplyLevel, AbilitySystemComponent->MakeEffectContext());
+	if (!EffectHandle.WasSuccessfullyApplied())
+	{
+		bConsumed = false;
+		return;
+	}
+
+	SetActorEnableCollision(false);
 	BP_OnStoneConsumed();
+	if (!IsActorBeingDestroyed())
+	{
+		Destroy();
+	}
 }
 
 void AWarriorStoneBase::OnPickUpCollisionSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent,

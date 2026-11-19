@@ -23,4 +23,7 @@ protected:
 	void BP_OnStoneConsumed();
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UGameplayEffect> StoneGameplayEffect;
+
+private:
+	bool bConsumed = false;
 };

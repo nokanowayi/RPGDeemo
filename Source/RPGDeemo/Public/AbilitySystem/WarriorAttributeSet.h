@@ -46,12 +46,19 @@ public:
 
 	UFUNCTION()
 	virtual void OnRep_CurrentExp(const FGameplayAttributeData& OldCurrentExp);
+
+	UFUNCTION()
+	virtual void OnRep_MaxPosture(const FGameplayAttributeData& OldMaxPosture);
+	
+	UFUNCTION()
+	virtual void OnRep_CurrentPosture(const FGameplayAttributeData& OldCurrentPosture);
 	
 	/** 复制通知后广播UI更新 */
 	void BroadcastHealthChanged() const;
 	void BroadcastRageChanged() const;
 	void BroadcastExpChanged() const;
 	void BroadcastLevelChanged() const;
+	void BroadcastPostureChanged() const;
 
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentHealth, Category = "Health")
 	FGameplayAttributeData CurrentHealth;
@@ -88,6 +95,14 @@ public:
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentExp, Category = "Level")
 	FGameplayAttributeData CurrentExp;
 	ATTRIBUTE_ACCESSORS(UWarriorAttributeSet, CurrentExp)
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxPosture, Category = "Posture")
+	FGameplayAttributeData MaxPosture;
+	ATTRIBUTE_ACCESSORS(UWarriorAttributeSet, MaxPosture)
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentPosture, Category = "Posture")
+	FGameplayAttributeData CurrentPosture;
+	ATTRIBUTE_ACCESSORS(UWarriorAttributeSet, CurrentPosture)
 
 private:
 	TWeakInterfacePtr<IPawnUIInterface> CachedPawnUIInterface;

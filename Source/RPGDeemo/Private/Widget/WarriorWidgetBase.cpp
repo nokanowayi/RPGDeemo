@@ -67,6 +67,7 @@ bool UWarriorWidgetBase::TryBindOwningPawnUI()
 				HeroUIComponent->BroadcastCurrentRageState();
 				HeroUIComponent->BroadcastCurrentExpState();
 				HeroUIComponent->BroadcastCurrentLevelState();
+				HeroUIComponent->BroadcastCurrentPostureState();
 				return true;
 			}
 			
@@ -83,6 +84,8 @@ void UWarriorWidgetBase::InitEnemyWidget(AActor* OwningEnemyActor)
 		if (UEnemyUIComponent* EnemyUIComponent = PawnUIInterface->GetEnemyUIComponent())
 		{
 			BP_OnOwningEnemyUIComponentInitialized(EnemyUIComponent);
+			EnemyUIComponent->BroadcastCurrentHealthState();
+			EnemyUIComponent->BroadcastCurrentPostureState();
 		}
 	}
 }

@@ -66,6 +66,8 @@ namespace WarriorGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Player_Status_Rage_Full,"Player.Status.Rage.Full");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Status_Rage_None,"Player.Status.Rage.None");
 
+	UE_DEFINE_GAMEPLAY_TAG(Player_Special_CombatArt,"Player.Special.CombatArt");
+	
 	UE_DEFINE_GAMEPLAY_TAG(Player_Combo_Window,"Player.Combo.Window");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Combo_L,"Player.Combo.L");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Combo_R,"Player.Combo.R");
@@ -73,6 +75,7 @@ namespace WarriorGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Player_Combo_LR,"Player.Combo.LR");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Combo_RR,"Player.Combo.RR");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Combo_LRR,"Player.Combo.LRR");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Combo_ArtCombat,"Player.Combo.ArtCombat");
 	
 	
 	UE_DEFINE_GAMEPLAY_TAG(Player_SetByCaller_AttackType_Light,"Player.SetByCaller.AttackType.Light");
@@ -83,9 +86,11 @@ namespace WarriorGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Enemy_Ability_Ranged,"Enemy.Ability.Ranged");
 	UE_DEFINE_GAMEPLAY_TAG(Enemy_Ability_SummonEnemies,"Enemy.Ability.SummonEnemies");
 	UE_DEFINE_GAMEPLAY_TAG(Enemy_Ability_SpawnStone,"Enemy.Ability.SpawnStone");
+	UE_DEFINE_GAMEPLAY_TAG(Enemy_Ability_BrokenPosture,"Enemy.Ability.BrokenPosture");
 
 	UE_DEFINE_GAMEPLAY_TAG(Enemy_Weapon,"Enemy.Weapon");
 	UE_DEFINE_GAMEPLAY_TAG(Enemy_Event_SummonEnemies,"Enemy.Event.SummonEnemies");
+	UE_DEFINE_GAMEPLAY_TAG(Enemy_Event_PostureBroken,"Enemy.Event.PostureBroken");
 
 	UE_DEFINE_GAMEPLAY_TAG(Enemy_Status_Strafing,"Enemy.Status.Strafing");
 	UE_DEFINE_GAMEPLAY_TAG(Enemy_Status_UnderAttack,"Enemy.Status.UnderAttack");
@@ -114,6 +119,7 @@ namespace WarriorGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Shared_Event_SpawnProjectile,"Shared.Event.SpawnProjectile");
 	
 	UE_DEFINE_GAMEPLAY_TAG(Shared_SetByCaller_BaseDamage,"Shared.SetByCaller.BaseDamage");
+	UE_DEFINE_GAMEPLAY_TAG(Shared_SetByCaller_Posture,"Shared.SetByCaller.Posture");
 	
 	UE_DEFINE_GAMEPLAY_TAG(Shared_Status_Dead,"Shared.Status.Dead");
 	UE_DEFINE_GAMEPLAY_TAG(Shared_Status_HitReact_Front,"Shared.Status.HitReact.Front");

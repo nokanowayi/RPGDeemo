@@ -72,29 +72,17 @@ UWarriorAbilitySystemComponent* UWarriorGameplayAbility::GetWarriorAbilitySystem
 FActiveGameplayEffectHandle UWarriorGameplayAbility::NativeApplyGameplaySpecEffectHandleToTarget(AActor* TargetActor,
 	const FGameplayEffectSpecHandle& InSpecHandle) const
 {
-	UE_LOG(LogTemp, Warning, TEXT("=== NativeApplyGameplaySpecEffectHandleToTarget ==="));
-	UE_LOG(LogTemp, Warning, TEXT("TargetActor: %s"), TargetActor ? *TargetActor->GetName() : TEXT("NULL"));
 
 	UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor);
-	UE_LOG(LogTemp, Warning, TEXT("Target ASC: %s"), ASC ? *ASC->GetName() : TEXT("NULL"));
 
 	if (!InSpecHandle.Data.IsValid())
 	{
-		UE_LOG(LogTemp, Error, TEXT("InSpecHandle.Data is INVALID (nullptr)"));
 		return FActiveGameplayEffectHandle();
 	}
 
 	FGameplayEffectSpec* Spec = InSpecHandle.Data.Get();
-	UE_LOG(LogTemp, Warning, TEXT("Spec: %s, Def: %s, Level: %.1f"),
-		Spec ? TEXT("Valid") : TEXT("NULL"),
-		Spec && Spec->Def ? *Spec->Def->GetName() : TEXT("NULL"),
-		Spec ? Spec->GetLevel() : -1.f);
 
 	FActiveGameplayEffectHandle Result = GetWarriorAbilitySystemComponent()->ApplyGameplayEffectSpecToTarget(*InSpecHandle.Data.Get(), ASC);
-
-	UE_LOG(LogTemp, Warning, TEXT("ApplyGameplayEffectSpecToTarget result: %s (Valid=%d)"),
-		Result.WasSuccessfullyApplied() ? TEXT("SUCCESS") : TEXT("FAILED"),
-		Result.IsValid() ? 1 : 0);
 
 	return Result;
 }

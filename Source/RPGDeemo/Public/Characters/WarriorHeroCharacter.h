@@ -77,6 +77,10 @@ private:
 	void Input_SwitchTargetTriggered(const FInputActionValue& InputActionValue);
 	void Input_SwitchTargetCompleted(const FInputActionValue& InputActionValue);
 	void Input_InteractStarted(const FInputActionValue& InputActionValue);
+
+	UFUNCTION(Server, Reliable)
+	void ServerRequestInteract();
+
 	UPROPERTY()
 	FVector2D SwitchDirection = FVector2D::ZeroVector;
 	

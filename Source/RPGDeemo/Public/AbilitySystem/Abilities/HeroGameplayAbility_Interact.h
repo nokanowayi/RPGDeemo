@@ -24,7 +24,14 @@ protected:
 	void CollectStones();
 
 	UFUNCTION(blueprintCallable)
+	void SetVis();
+	
+	UFUNCTION(blueprintCallable)
+	void InteractDoor();
+
+	UFUNCTION(blueprintCallable)
 	void ConsumeStones();
+
 private:
 	void SetInteractionPromptVisible(bool bVisible);
 
